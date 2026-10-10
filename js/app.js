@@ -34,5 +34,5 @@ async function go(k) {
   catch (e) { app.innerHTML = header('เกิดข้อผิดพลาด', esc(e.message)) + `<div class="g"><button class="b" onclick="location.reload()">ลองใหม่</button></div>`; }
 }
 ROLES[localStorage.getItem('role')] ? go(localStorage.getItem('role')) : landing();
-setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 450); }, 1000);
+setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 450); }, 1500);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
