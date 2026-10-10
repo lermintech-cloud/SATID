@@ -1,0 +1,25 @@
+import { db } from '../db.js';
+import { esc, pill, toast, header } from '../ui.js';
+
+export async function render(el) {
+  const [{ data: ws = [] }, { data: ts, error }] = await Promise.all([
+    db.from('workers').select('id,name').eq('active', true),
+    db.from('tasks').select('*,workers(name)').order('created_at', { ascending: false }).limit(30)]);
+  if (error) return el.innerHTML = header('ผิดพลาด', esc(error.message));
+  el.innerHTML = header('ครู', 'มอบหมายและตรวจรับงาน') + `<div class="g">
+    <form id="f" class="f"><input class="in" name="title" placeholder="ชื่องาน" required>
+    <select class="in" name="worker_id" required>${ws.map(w => `<option value="${w.id}">${esc(w.name)}</option>`).join('')}</select>
+    <input class="in" type="datetime-local" name="due_at"><button class="b">มอบหมายงาน</button></form>` +
+    ts.map(t => `<div class="c"><div class="i">📝</div><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}</small></div>` +
+      (t.status === 'submitted' ? `<button class="p ok" data-a="approved" data-id="${t.id}">อนุมัติ</button><button class="p er" data-a="rejected" data-id="${t.id}">ตีกลับ</button>` : pill(t.status)) + `</div>`).join('') + `</div>`;
+  el.querySelector('#f').onsubmit = async e => {
+    e.preventDefault(); const f = Object.fromEntries(new FormData(e.target));
+    f.due_at ? f.due_at = new Date(f.due_at).toISOString() : delete f.due_at;
+    const { error } = await db.from('tasks').insert(f);
+    toast(error ? error.message : 'มอบหมายงานแล้ว ✅'); render(el);
+  };
+  el.querySelectorAll('[data-a]').forEach(b => b.onclick = async () => {
+    const { error } = await db.from('tasks').update({ status: b.dataset.a }).eq('id', b.dataset.id);
+    toast(error ? error.message : 'บันทึกแล้ว'); render(el);
+  });
+}
