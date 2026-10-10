@@ -1,15 +1,15 @@
 import { esc, header } from './ui.js';
 const ROLES = {
-  worker:   { label: 'ภารโรง',       icon: '🧹', sub: 'ดูงาน ส่งงาน',          load: () => import('./views/worker.js') },
-  teacher:  { label: 'ครู',          icon: '👩‍🏫', sub: 'มอบหมาย ตรวจรับงาน',   load: () => import('./views/teacher.js') },
-  director: { label: 'ผู้อำนวยการ',  icon: '🏫', sub: 'สรุปภาพรวม ติดตามงาน', load: () => import('./views/director.js') },
+  worker:   { label: 'ภารโรง',      icon: '🧹',   load: () => import('./views/worker.js') },
+  teacher:  { label: 'ครู',         icon: '👩‍🏫', load: () => import('./views/teacher.js') },
+  director: { label: 'ผู้อำนวยการ', icon: '🏫',   load: () => import('./views/director.js') },
 };
 const app = document.getElementById('app'), back = document.getElementById('back');
 
 function landing() {
   back.hidden = true; localStorage.removeItem('role');
-  app.innerHTML = `<div class="landing">${header('🧹 ระบบนักการภารโรง', 'โรงเรียนบ้านไร่')}<div class="g"><p style="text-align:center;font-weight:600">เข้าใช้งานในฐานะ</p>` +
-    Object.entries(ROLES).map(([k, r]) => `<button class="c" data-r="${k}" style="min-height:92px"><div class="i" style="width:60px;height:60px;font-size:30px">${r.icon}</div><div class="t">${esc(r.label)}<small>${esc(r.sub)}</small></div>›</button>`).join('') + `</div><div id="dash"></div></div>`;
+  app.innerHTML = `<div class="landing">${header('🧹 ระบบนักการภารโรง', 'โรงเรียนบ้านไร่')}<div class="g"><p style="text-align:center;font-weight:600">เข้าใช้งานในฐานะ</p><div class="roles">` +
+    Object.entries(ROLES).map(([k, r]) => `<button class="c" data-r="${k}"><div class="i">${r.icon}</div><div class="t">${esc(r.label)}</div></button>`).join('') + `</div></div><div id="dash"></div></div>`;
   app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => go(b.dataset.r));
   import('./views/dashboard.js').then(m => m.renderDashboard(document.getElementById('dash'))).catch(() => {});
 }

@@ -6,3 +6,8 @@ export function toast(m) {
   const t = Object.assign(document.createElement('div'), { className: 'toast', textContent: m });
   document.body.append(t); setTimeout(() => t.remove(), 2200);
 }
+export function busy(msg) {
+  const o = document.createElement('div'); o.className = 'ov'; o.innerHTML = '<div class="sp"></div><p></p>';
+  document.body.append(o); const p = o.querySelector('p'); p.textContent = msg;
+  return { set: m => p.textContent = m, done: () => o.remove() };
+}

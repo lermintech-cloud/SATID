@@ -6,11 +6,13 @@ async function shrink(file, maxW, q) {
   c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
   return new Promise(r => c.toBlob(r, 'image/jpeg', q));
 }
-export async function uploadPhoto(db, taskId, kind, file) {
+export async function uploadPhoto(db, taskId, kind, file, onStep) {
   const base = `${taskId}/${kind}-${Date.now()}`, bucket = db.storage.from('task-photos');
+  onStep?.('กำลังปรับขนาดรูป…');
   let full = await shrink(file, 1280, 0.7);
   if (full.size > 500000) full = await shrink(file, 1024, 0.55); // bucket จำกัด 500 KB
   const thumbBlob = await shrink(file, 320, 0.6);
+  onStep?.('กำลังอัปโหลด… อย่าปิดหน้านี้');
   for (const [p, b] of [[`${base}.jpg`, full], [`${base}-t.jpg`, thumbBlob]]) {
     const { error } = await bucket.upload(p, b, { contentType: 'image/jpeg' });
     if (error) throw error;
