@@ -71,3 +71,32 @@ body{background:linear-gradient(180deg,#E8F5F3 0%,#F4F1FB 55%,#FFF6EC 100%) fixe
 .bar i{background:linear-gradient(90deg,#34D399,#14B8A6)}
 .slot .pv{background:linear-gradient(135deg,#E8F5F3,#EEF0FF)}
 .av{background:#D5F3EE}
+/* ===== ธีมแยกตามบทบาท (body[data-theme]) ===== */
+body{--a:#0B5D57;--a2:#14867D;--a3:#4DB6AC;--tint:#E3F4F1;--glow:#14867d33;--pri:#0B5D57;--b1:#E8F5F3;--b2:#F4F1FB;--b3:#FFF6EC}
+body[data-theme=worker]{--a:#047857;--a2:#10B981;--a3:#6EE7B7;--tint:#D1FAE5;--glow:#10b98133;--pri:#047857;--b1:#E3F6EC;--b2:#F0FAF5;--b3:#FBFDF7}
+body[data-theme=teacher]{--a:#1E40AF;--a2:#2563EB;--a3:#60A5FA;--tint:#DBEAFE;--glow:#2563eb33;--pri:#1E40AF;--b1:#E4EDFE;--b2:#F0F5FF;--b3:#F8FAFF}
+body[data-theme=director]{--a:#4C1D95;--a2:#7C3AED;--a3:#A78BFA;--tint:#EDE9FE;--glow:#7c3aed33;--pri:#5B21B6;--b1:#EFE9FD;--b2:#F6F2FF;--b3:#FFF8E8}
+body[data-theme=today]{--a:#C2410C;--a2:#EA580C;--a3:#FDBA74;--tint:#FFEDD5;--glow:#ea580c33;--pri:#C2410C;--b1:#FFEFDC;--b2:#FFF6EA;--b3:#FFFBF3}
+body{background:linear-gradient(180deg,var(--b1) 0%,var(--b2) 55%,var(--b3) 100%) fixed}
+.h{background:linear-gradient(135deg,var(--a) 0%,var(--a2) 60%,var(--a3) 100%);box-shadow:0 12px 32px var(--glow);overflow:hidden}
+.h::after{content:'';position:absolute;right:-50px;top:-50px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,#ffffff33,transparent 70%);pointer-events:none}
+.h h1{letter-spacing:.2px}
+body[data-theme=director] .h{border-bottom:3px solid #E2C26B}
+.b{background:linear-gradient(135deg,var(--a),var(--a2));box-shadow:0 8px 20px var(--glow)}
+.b.o{background:#fff;color:var(--a);border-color:var(--a2);box-shadow:none}
+.p.on{background:var(--a)}
+.dn{border-color:var(--a2);color:var(--a)}.dn.y{background:#16A34A;border-color:#16A34A;color:#fff}
+.sec::before{background:var(--a2)}
+.bar i{background:linear-gradient(90deg,var(--a2),var(--a3))}
+.in:focus{outline:0;border-color:var(--a2);box-shadow:0 0 0 3px var(--glow)}
+.slot .pv{background:linear-gradient(135deg,var(--tint),#fff)}
+body:not([data-theme=home]) .c{border-left:4px solid var(--a3);box-shadow:0 6px 20px var(--glow)}
+.i{background:var(--tint);color:var(--a)}
+.tone-w{background:#D1FAE5;color:#047857}.tone-t{background:#DBEAFE;color:#1E40AF}.tone-d{background:#EDE9FE;color:#5B21B6}.tone-n{background:#FFEDD5;color:#C2410C}
+.s-todo{background:#E4EDFF;color:#3B6FD4}.s-doing{background:#FEF3C7;color:#B45309}.s-submitted{background:#EDE9FE;color:#6D4FD4}.s-approved{background:#DCFCE7;color:#15803D}.s-rejected{background:#FEE2E2;color:#B91C1C}
+/* ปุ่มบทบาทหน้าแรก: แต่ละใบมีสีของตัวเอง */
+.roles .c:nth-child(1){background:linear-gradient(160deg,#fff 30%,#D1FAE5);box-shadow:0 8px 22px #10b98126}
+.roles .c:nth-child(2){background:linear-gradient(160deg,#fff 30%,#DBEAFE);box-shadow:0 8px 22px #2563eb26}
+.roles .c:nth-child(3){background:linear-gradient(160deg,#fff 30%,#EDE9FE);box-shadow:0 8px 22px #7c3aed26}
+.roles .t{font-weight:700}
+.c.wide{background:linear-gradient(135deg,#FFF8EC,#FFE8CC);box-shadow:0 8px 22px #ea580c26}

@@ -7,10 +7,12 @@ const ROLES = {
   today:    { label: 'งานวันนี้',   icon: 'list',   load: () => import('./views/today.js') },
 };
 const TONE = { worker: 'w', teacher: 't', director: 'd', today: 'n' };
+const THEMES = { home: '#0B5D57', worker: '#047857', teacher: '#1E40AF', director: '#5B21B6', today: '#C2410C' };
+const setTheme = k => { document.body.dataset.theme = k; document.querySelector('meta[name=theme-color]').content = THEMES[k]; };
 const app = document.getElementById('app'), back = document.getElementById('back');
 
 function landing() {
-  back.hidden = true; localStorage.removeItem('role');
+  back.hidden = true; localStorage.removeItem('role'); setTheme('home');
   app.innerHTML = `<div class="landing">${header('ระบบนักการภารโรง', 'โรงเรียนบ้านไร่ อ.ดอยเต่า จ.เชียงใหม่')}<div class="g"><p style="text-align:center;font-weight:600">เข้าใช้งานในฐานะ</p><div class="roles">` +
     Object.entries(ROLES).filter(([k]) => k !== 'today').map(([k, r]) => `<button class="c" data-r="${k}"><div class="i tone-${TONE[k]}">${ic(r.icon, 24)}</div><div class="t">${esc(r.label)}</div></button>`).join('') +
     `</div><button class="c wide" data-r="today"><div class="i tone-n">${ic('list', 26)}</div><div class="t">งานวันนี้<small>งานประจำที่ต้องทำทุกวัน กดดำเนินการแล้วได้เลย</small></div></button></div><div id="dash"></div></div>`;
@@ -18,7 +20,7 @@ function landing() {
   import('./views/dashboard.js').then(m => m.renderDashboard(document.getElementById('dash'))).catch(() => {});
 }
 async function go(k) {
-  localStorage.setItem('role', k); back.hidden = false;
+  localStorage.setItem('role', k); back.hidden = false; setTheme(k);
   app.innerHTML = `<div class="empty">กำลังโหลด…</div>`;
   try { (await ROLES[k].load()).render(app); }
   catch (e) { app.innerHTML = header('เกิดข้อผิดพลาด', esc(e.message)) + `<div class="g"><button class="b" onclick="location.reload()">ลองใหม่</button></div>`; }
