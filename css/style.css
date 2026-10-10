@@ -135,3 +135,4 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 #nav .nc:not(.on) .ni{background:linear-gradient(135deg,#94A3B8,#B6C2CC);box-shadow:0 8px 18px #64748b33,0 0 0 5px #fff}
 #nav button:active .ni{transform:scale(.92)}
 .toast{bottom:calc(env(safe-area-inset-bottom) + 108px)}
+.cr-s{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 30px);left:0;right:0;text-align:center;font-size:13px;opacity:.85;letter-spacing:.3px}
