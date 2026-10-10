@@ -100,3 +100,38 @@ body:not([data-theme=home]) .c{border-left:4px solid var(--a3);box-shadow:0 6px 
 .roles .c:nth-child(3){background:linear-gradient(160deg,#fff 30%,#EDE9FE);box-shadow:0 8px 22px #7c3aed26}
 .roles .t{font-weight:700}
 .c.wide{background:linear-gradient(135deg,#FFF8EC,#FFE8CC);box-shadow:0 8px 22px #ea580c26}
+/* ===== สไตล์เมนูทางลัด + การ์ดสถิติไล่สี + หน้าเปิด ===== */
+.sk{background:#fff;border-radius:28px;padding:18px;box-shadow:0 8px 28px #2a6f7a1f}
+.skt{font-weight:700;display:flex;align-items:center;gap:6px}.skt .ic{color:#F59E0B}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.sg button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:8px;font-size:13px;font-weight:600;line-height:1.2;text-align:center;cursor:pointer}
+.tile{width:68px;height:68px;border-radius:22px;display:grid;place-items:center;color:#fff;box-shadow:0 8px 18px var(--sh);transition:transform .12s}
+.sg button:active .tile{transform:scale(.93)}
+.tl-w{background:linear-gradient(135deg,#10B981,#6EE7B7);--sh:#10b98150}.tl-t{background:linear-gradient(135deg,#2563EB,#38BDF8);--sh:#2563eb50}
+.tl-d{background:linear-gradient(135deg,#5B21B6,#A78BFA);--sh:#7c3aed50}.tl-n{background:linear-gradient(135deg,#F97316,#FDBA74);--sh:#f9731650}
+.gts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gt{position:relative;overflow:hidden;border-radius:24px;padding:16px 14px;color:#fff;display:flex;gap:12px;align-items:center;min-height:96px;box-shadow:0 8px 20px #0002}
+.gt::after{content:'';position:absolute;right:-34px;top:-34px;width:110px;height:110px;border-radius:50%;background:#ffffff22}
+.gi{width:50px;height:50px;border-radius:16px;background:#ffffff33;display:grid;place-items:center;flex:none}
+.gt small{display:block;font-size:13px;opacity:.95}.gt b{font-size:30px;line-height:1.15}
+.g-gr{background:linear-gradient(135deg,#3DAA6F,#5CC48C)}.g-or{background:linear-gradient(135deg,#F2552B,#FF8A5C)}
+.g-bl{background:linear-gradient(135deg,#0A7BC9,#30B0F0)}.g-vi{background:linear-gradient(135deg,#4C2A85,#7C55C4)}
+#splash{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;background:linear-gradient(145deg,#0B5D57,#14867D 55%,#2FBF9A);transition:opacity .4s;overflow:hidden}
+#splash.hide{opacity:0;pointer-events:none}
+#splash h1{font-size:26px;margin-top:22px}#splash p{opacity:.9}
+.sl{width:132px;height:132px;border-radius:36px;background:#ffffff2e;border:1px solid #ffffff59;backdrop-filter:blur(8px);display:grid;place-items:center;box-shadow:0 12px 32px #0003}
+.sl img{width:84px;height:auto;filter:drop-shadow(0 2px 6px #0003)}
+.sh{position:absolute;border:2px solid #ffffff38;background:#ffffff14}.sh.a{width:300px;height:300px;border-radius:50%;left:-110px;top:-100px}
+.sh.b{width:240px;height:240px;border-radius:56px;right:-80px;top:20%;transform:rotate(18deg)}.sh.c{width:300px;height:300px;border-radius:64px;left:-70px;bottom:-110px;transform:rotate(-16deg)}
+.dots{display:flex;gap:10px;margin-top:26px}.dots i{width:12px;height:12px;border-radius:50%;background:#fff;animation:pulse 1s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}@keyframes pulse{50%{transform:scale(.6);opacity:.5}}
+/* ===== แถบเมนูล่าง ===== */
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+#nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,480px);z-index:8;display:flex;justify-content:space-around;align-items:flex-end;background:#ffffffee;backdrop-filter:blur(12px);border-radius:26px 26px 0 0;box-shadow:0 -8px 28px #0b1f2418;padding:10px 6px calc(env(safe-area-inset-bottom) + 8px)}
+#nav button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:600;color:#7B8E94;cursor:pointer;min-height:54px;justify-content:flex-end}
+#nav .ni{display:grid;place-items:center;transition:transform .15s}
+#nav button.on{color:var(--a)}#nav button.on:not(.nc) .ni{transform:translateY(-2px)}
+#nav .nc .ni{width:60px;height:60px;border-radius:50%;margin-top:-34px;background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;box-shadow:0 8px 20px var(--glow),0 0 0 5px #fff}
+#nav .nc:not(.on) .ni{background:linear-gradient(135deg,#94A3B8,#B6C2CC);box-shadow:0 8px 18px #64748b33,0 0 0 5px #fff}
+#nav button:active .ni{transform:scale(.92)}
+.toast{bottom:calc(env(safe-area-inset-bottom) + 108px)}
