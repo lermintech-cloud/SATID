@@ -12,7 +12,7 @@ export async function render(el) {
     <form id="f" class="f"><input class="in" name="title" placeholder="ชื่องาน" required>
     <select class="in" name="worker_id" required>${ws.map(w => `<option value="${w.id}">${esc(w.name)}</option>`).join('')}</select>
     <input class="in" type="datetime-local" name="due_at"><button class="b">มอบหมายงาน</button></form>` +
-    ts.map(t => `<div class="c"><div class="i">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${link(t.photo_before_url, 'ก่อน')}${link(t.photo_after_url, 'หลัง')}</small></div>` +
+    ts.map(t => `<div class="c"><div class="i s-${t.status}">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${link(t.photo_before_url, 'ก่อน')}${link(t.photo_after_url, 'หลัง')}</small></div>` +
       (t.status === 'submitted' ? `<button class="p ok" data-a="approved" data-id="${t.id}">อนุมัติ</button><button class="p er" data-a="rejected" data-id="${t.id}">ตีกลับ</button>` : pill(t.status)) + `</div>`).join('') + `</div>`;
   const done = (error, m) => { toast(error ? error.message : m); render(el); };
   el.querySelector('#f').onsubmit = async e => {

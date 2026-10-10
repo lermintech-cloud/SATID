@@ -54,3 +54,20 @@ button.p{cursor:pointer;min-height:36px}
 .lbc{display:flex;flex-direction:column;gap:18px;max-width:640px;margin:auto}.lbc img{width:100%;border-radius:14px}.lbc figcaption{color:#fff;text-align:center;margin-top:6px}
 .lb .x{position:fixed;top:calc(env(safe-area-inset-top) + 10px);right:14px;width:44px;height:44px;border:0;border-radius:50%;background:#ffffff30;color:#fff;font-size:20px;cursor:pointer}
 .cr{text-align:center;font-size:12px;color:var(--mut);padding:18px 12px calc(env(safe-area-inset-bottom) + 18px)}
+/* ธีมสีอ่อน สบายตา */
+body{background:linear-gradient(180deg,#E8F5F3 0%,#F4F1FB 55%,#FFF6EC 100%) fixed}
+.h{background:linear-gradient(135deg,#0B5D57 0%,#14867D 55%,#4DB6AC 100%);box-shadow:0 10px 30px #14867d33}
+.c{border:0;border-radius:22px;box-shadow:0 6px 20px #2a6f7a14}
+.i{border-radius:16px}
+.tone-w{background:#D5F3EE;color:#0F766E}.tone-t{background:#DCEBFF;color:#2563EB}.tone-d{background:#EAE3FF;color:#6D4FD4}.tone-n{background:#FFE9CC;color:#C2610C}
+.s-todo{background:#E4EDFF;color:#3B6FD4}.s-doing{background:#FEF3C7;color:#B45309}.s-submitted{background:#EDE9FE;color:#6D4FD4}.s-approved{background:#DCFCE7;color:#15803D}.s-rejected{background:#FEE2E2;color:#B91C1C}
+.st div{border-radius:20px}
+.st div:nth-child(1){background:#E9FBF0}.st div:nth-child(1) b{color:#15803D}
+.st div:nth-child(2){background:#FFF6E0}.st div:nth-child(2) b{color:#B45309}
+.st div:nth-child(3){background:#FFEDED}.st div:nth-child(3) b{color:#B91C1C}
+.st div:nth-child(4){background:#EAF1FF}.st div:nth-child(4) b{color:#2563EB}
+.c.wide{background:linear-gradient(135deg,#FFF8EC,#FFEFD9);box-shadow:0 6px 20px #e8a25a26}
+.sec::before{content:'';display:inline-block;width:8px;height:8px;border-radius:50%;background:#14867D;margin-right:8px;vertical-align:1px}
+.bar i{background:linear-gradient(90deg,#34D399,#14B8A6)}
+.slot .pv{background:linear-gradient(135deg,#E8F5F3,#EEF0FF)}
+.av{background:#D5F3EE}

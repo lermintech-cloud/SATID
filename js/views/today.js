@@ -17,7 +17,7 @@ async function draw(el) {
   const rt = a.data, dn = new Set((b.data ?? []).map(l => l.routine_id)), n = rt.filter(r => dn.has(r.id)).length;
   const again = (error, m) => { toast(error ? error.message : m); draw(el); };
   el.innerHTML = head + `<div class="g"><div class="c" style="display:block"><b>ทำแล้ว ${n} จาก ${rt.length} รายการ</b><div class="bar"><i style="width:${rt.length ? Math.round(n / rt.length * 100) : 0}%"></i></div></div>` +
-    rt.map(r => `<div class="c"><div class="t">${esc(r.title)}</div>` + (editing
+    rt.map((r, i) => `<div class="c"><div class="i tone-${'wtdn'[i % 4]}">${ic('task', 20)}</div><div class="t">${esc(r.title)}</div>` + (editing
       ? `<button class="p" data-ed="${r.id}">${ic('pen', 16)} แก้</button><button class="p er" data-rm="${r.id}">${ic('trash', 16)} ลบ</button>`
       : `<button class="dn ${dn.has(r.id) ? 'y' : ''}" data-rt="${r.id}">${dn.has(r.id) ? ic('check', 18) + ' ' : ''}ดำเนินการแล้ว</button>`) + `</div>`).join('') +
     (rt.length || editing ? '' : `<div class="empty">ยังไม่มีรายการ กด “แก้ไขรายการ” เพื่อเพิ่ม</div>`) +

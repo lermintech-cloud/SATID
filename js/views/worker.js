@@ -18,7 +18,7 @@ export async function render(el) {
   if (error) return el.innerHTML = header('ผิดพลาด', esc(error.message));
   const done = tasks.filter(t => ['submitted', 'approved'].includes(t.status)).length;
   el.innerHTML = header('งานของฉัน', `ส่งแล้ว ${done} จาก ${tasks.length} งาน`) + `<div class="g"><div class="bar"><i style="width:${tasks.length ? Math.round(done / tasks.length * 100) : 0}%"></i></div>` +
-    (tasks.length ? tasks.map(t => `<button class="c" data-t="${t.id}"><div class="i">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.detail || '')}</small></div>${pill(t.status)}</button>`).join('') : `<div class="empty">ยังไม่มีงานมอบหมาย</div>`) + `</div>`;
+    (tasks.length ? tasks.map(t => `<button class="c" data-t="${t.id}"><div class="i s-${t.status}">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.detail || '')}</small></div>${pill(t.status)}</button>`).join('') : `<div class="empty">ยังไม่มีงานมอบหมาย</div>`) + `</div>`;
   el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
     const t = tasks.find(x => x.id === b.dataset.t);
     if (['submitted', 'approved'].includes(t.status)) return toast('งานนี้ส่งแล้ว');
