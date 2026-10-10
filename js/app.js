@@ -6,25 +6,33 @@ const ROLES = {
   director: { label: 'ผู้อำนวยการ', icon: 'dash',   load: () => import('./views/director.js') },
   today:    { label: 'งานวันนี้',   icon: 'list',   load: () => import('./views/today.js') },
 };
+// แถบเมนูล่าง: [คีย์, ป้าย, ไอคอน] ปุ่มกลาง (ภารโรง) เป็นปุ่มนูน
+const NAV = [['home', 'หน้าแรก', 'home'], ['today', 'งานวันนี้', 'list'], ['worker', 'ภารโรง', 'wrench'], ['teacher', 'ครู', 'cap'], ['director', 'ผอ.', 'dash']];
 const TONE = { worker: 'w', teacher: 't', director: 'd', today: 'n' };
 const THEMES = { home: '#0B5D57', worker: '#047857', teacher: '#1E40AF', director: '#5B21B6', today: '#C2410C' };
-const setTheme = k => { document.body.dataset.theme = k; document.querySelector('meta[name=theme-color]').content = THEMES[k]; };
-const app = document.getElementById('app'), back = document.getElementById('back');
+const app = document.getElementById('app'), nav = document.getElementById('nav');
+
+function setTheme(k) {
+  document.body.dataset.theme = k; document.querySelector('meta[name=theme-color]').content = THEMES[k];
+  nav.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.n === k));
+}
+nav.innerHTML = NAV.map(([k, l, i], n) => `<button data-n="${k}" class="${n === 2 ? 'nc' : ''}"><span class="ni">${ic(i, n === 2 ? 28 : 22)}</span><span>${l}</span></button>`).join('');
+nav.querySelectorAll('button').forEach(b => b.onclick = () => { scrollTo(0, 0); b.dataset.n === 'home' ? landing() : go(b.dataset.n); });
 
 function landing() {
-  back.hidden = true; localStorage.removeItem('role'); setTheme('home');
-  app.innerHTML = `<div class="landing">${header('ระบบนักการภารโรง', 'โรงเรียนบ้านไร่ อ.ดอยเต่า จ.เชียงใหม่')}<div class="g"><p style="text-align:center;font-weight:600">เข้าใช้งานในฐานะ</p><div class="roles">` +
-    Object.entries(ROLES).filter(([k]) => k !== 'today').map(([k, r]) => `<button class="c" data-r="${k}"><div class="i tone-${TONE[k]}">${ic(r.icon, 24)}</div><div class="t">${esc(r.label)}</div></button>`).join('') +
-    `</div><button class="c wide" data-r="today"><div class="i tone-n">${ic('list', 26)}</div><div class="t">งานวันนี้<small>งานประจำที่ต้องทำทุกวัน กดดำเนินการแล้วได้เลย</small></div></button></div><div id="dash"></div></div>`;
+  localStorage.removeItem('role'); setTheme('home');
+  app.innerHTML = `<div class="landing">${header('ระบบนักการภารโรง', 'โรงเรียนบ้านไร่ อ.ดอยเต่า จ.เชียงใหม่')}<div class="g"><div class="sk"><p class="skt">${ic('bolt', 18)} เมนูทางลัด</p><div class="sg">` +
+    Object.entries(ROLES).map(([k, r]) => `<button data-r="${k}"><span class="tile tl-${TONE[k]}">${ic(r.icon, 30)}</span>${esc(r.label)}</button>`).join('') +
+    `</div></div></div><div id="dash"></div></div>`;
   app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => go(b.dataset.r));
   import('./views/dashboard.js').then(m => m.renderDashboard(document.getElementById('dash'))).catch(() => {});
 }
 async function go(k) {
-  localStorage.setItem('role', k); back.hidden = false; setTheme(k);
+  localStorage.setItem('role', k); setTheme(k);
   app.innerHTML = `<div class="empty">กำลังโหลด…</div>`;
   try { (await ROLES[k].load()).render(app); }
   catch (e) { app.innerHTML = header('เกิดข้อผิดพลาด', esc(e.message)) + `<div class="g"><button class="b" onclick="location.reload()">ลองใหม่</button></div>`; }
 }
-back.onclick = landing;
 ROLES[localStorage.getItem('role')] ? go(localStorage.getItem('role')) : landing();
+setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 450); }, 1000);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
