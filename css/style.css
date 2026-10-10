@@ -136,3 +136,7 @@ body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 #nav button:active .ni{transform:scale(.92)}
 .toast{bottom:calc(env(safe-area-inset-bottom) + 108px)}
 .cr-s{position:absolute;bottom:calc(env(safe-area-inset-bottom) + 30px);left:0;right:0;text-align:center;font-size:13px;opacity:.85;letter-spacing:.3px}
+/* ===== กรอบโลโก้: สี่เหลี่ยมโค้งมนสีขาวขอบทอง (เนียนกับพื้นขาวของรูปได้เลย) ===== */
+.sl{width:142px;height:142px;border-radius:40px;background:#fff;border:3px solid #E2C26B;backdrop-filter:none;box-shadow:0 14px 36px #0004,0 0 0 8px #ffffff26}
+.sl img{width:auto;height:104px;filter:none}
+.brand .lg{border-radius:13px;box-shadow:0 0 0 2px #E2C26B,0 4px 12px #0004}
