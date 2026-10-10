@@ -9,8 +9,9 @@ const app = document.getElementById('app'), back = document.getElementById('back
 function landing() {
   back.hidden = true; localStorage.removeItem('role');
   app.innerHTML = `<div class="landing">${header('🧹 ระบบนักการภารโรง', 'โรงเรียนบ้านไร่')}<div class="g"><p style="text-align:center;font-weight:600">เข้าใช้งานในฐานะ</p>` +
-    Object.entries(ROLES).map(([k, r]) => `<button class="c" data-r="${k}" style="min-height:92px"><div class="i" style="width:60px;height:60px;font-size:30px">${r.icon}</div><div class="t">${esc(r.label)}<small>${esc(r.sub)}</small></div>›</button>`).join('') + `</div></div>`;
+    Object.entries(ROLES).map(([k, r]) => `<button class="c" data-r="${k}" style="min-height:92px"><div class="i" style="width:60px;height:60px;font-size:30px">${r.icon}</div><div class="t">${esc(r.label)}<small>${esc(r.sub)}</small></div>›</button>`).join('') + `</div><div id="dash"></div></div>`;
   app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => go(b.dataset.r));
+  import('./views/dashboard.js').then(m => m.renderDashboard(document.getElementById('dash'))).catch(() => {});
 }
 async function go(k) {
   localStorage.setItem('role', k); back.hidden = false;

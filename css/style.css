@@ -24,3 +24,6 @@ button.p{cursor:pointer;min-height:36px}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;z-index:9}
 .landing{animation:up .5s both}@keyframes up{from{opacity:0;transform:translateY(10px)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.sec{font-weight:700;margin-top:6px}
+.av{width:46px;height:46px;border-radius:14px;object-fit:cover;background:#E3F4F1;display:grid;place-items:center;font-weight:700;color:var(--pri);flex:none}
+.rk{display:flex;justify-content:space-between;padding:6px 0}
