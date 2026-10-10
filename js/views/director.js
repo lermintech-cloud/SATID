@@ -1,5 +1,6 @@
 import { db } from '../db.js';
 import { esc, header, pill } from '../ui.js';
+import { ic } from '../icons.js';
 const DAYS = 14, ymd = d => new Date(d).toLocaleDateString('sv-SE');
 
 export async function render(el) {
@@ -20,7 +21,7 @@ export async function render(el) {
   const idle = !open.length && !wait.length;
   const bar = (v, c) => `<i style="height:${Math.max(3, v / mx * 100)}%;background:${c}" title="${v}"></i>`;
   el.innerHTML = header('ผู้อำนวยการ', 'ภาพรวมงานภารโรง') + `<div class="g">
-    <div class="c" style="background:${idle ? '#F0FDF4' : '#FFFBEB'}"><div class="i" style="font-size:28px">${idle ? '😌' : '🧹'}</div><div class="t">${idle ? 'ภารโรงว่าง ไม่มีงานค้าง' : `มีงานค้าง ${open.length} งาน`}<small>${late.length ? `เกินกำหนด ${late.length} งาน` : 'ไม่มีงานเกินกำหนด'} · รอตรวจ ${wait.length}</small></div></div>
+    <div class="c" style="background:${idle ? '#F0FDF4' : '#FFFBEB'}"><div class="i">${ic(idle ? 'ok' : 'wrench', 26)}</div><div class="t">${idle ? 'ภารโรงว่าง ไม่มีงานค้าง' : `มีงานค้าง ${open.length} งาน`}<small>${late.length ? `เกินกำหนด ${late.length} งาน` : 'ไม่มีงานเกินกำหนด'} · รอตรวจ ${wait.length}</small></div></div>
     <div class="st"><div><b style="color:#16A34A">${ts.filter(t => t.status === 'approved').length}</b>อนุมัติ</div><div><b style="color:#F59E0B">${wait.length}</b>รอตรวจ</div><div><b style="color:#DC2626">${open.length}</b>ค้าง</div><div><b>${rDone}/${ids.size}</b>งานประจำ</div></div>
     <p class="sec">ปริมาณงาน ${DAYS} วันล่าสุด</p>
     <div class="c" style="display:block"><div class="ch">${days.map((d, i) => `<div>${bar(as[i], '#94C9C3')}${bar(dn[i], '#16A34A')}</div>`).join('')}</div>
@@ -28,5 +29,5 @@ export async function render(el) {
     <div class="lg"><span><i style="background:#94C9C3"></i>มอบหมาย</span><span><i style="background:#16A34A"></i>ส่งงาน</span></div>
     ${peakDay ? `<small style="color:var(--mut)">วันที่มอบหมายมากที่สุด: ${new Date(peakDay).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })} (${peak} งาน)</small>` : ''}</div>
     <p class="sec">งานค้างและรอตรวจ</p>` +
-    ([...late, ...open.filter(t => !late.includes(t)), ...wait].slice(0, 15).map(t => `<div class="c"><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${late.includes(t) ? ' · <b style="color:#DC2626">เกินกำหนด</b>' : ''}</small></div>${pill(t.status)}</div>`).join('') || `<div class="empty">ไม่มีงานค้าง 🎉</div>`) + `</div>`;
+    ([...late, ...open.filter(t => !late.includes(t)), ...wait].slice(0, 15).map(t => `<div class="c"><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${late.includes(t) ? ' · <b style="color:#DC2626">เกินกำหนด</b>' : ''}</small></div>${pill(t.status)}</div>`).join('') || `<div class="empty">ไม่มีงานค้าง</div>`) + `</div>`;
 }
