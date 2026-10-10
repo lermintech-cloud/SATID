@@ -27,3 +27,5 @@ button.p{cursor:pointer;min-height:36px}
 .sec{font-weight:700;margin-top:6px}
 .av{width:46px;height:46px;border-radius:14px;object-fit:cover;background:#E3F4F1;display:grid;place-items:center;font-weight:700;color:var(--pri);flex:none}
 .rk{display:flex;justify-content:space-between;padding:6px 0}
+.slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:160px;border:2px dashed #94A3B8;border-radius:20px;background:#fff;font-size:18px;cursor:pointer;overflow:hidden}
+.slot img{width:100%;height:160px;object-fit:cover}
