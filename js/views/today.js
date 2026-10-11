@@ -4,8 +4,18 @@ import { ic } from '../icons.js';
 const SAMPLES = ['เปิดประตูโรงเรียน', 'กวาดลานหน้าเสาธง', 'ทำความสะอาดห้องน้ำ', 'เก็บขยะทั่วบริเวณ', 'รดน้ำต้นไม้', 'เช็ดถูทางเดินอาคารเรียน', 'ตรวจก๊อกน้ำและไฟฟ้า', 'เติมสบู่และกระดาษชำระ', 'เปิด-ปิดไฟส่วนกลาง', 'ปิดไฟ ล็อกประตูห้อง'];
 let editing = false;
 const ymd = () => new Date().toLocaleDateString('sv-SE');
-
 export function render(el) { editing = false; draw(el); }
+
+// ปุ่มเลื่อนเพื่อยืนยัน (slide to confirm)
+function slider(box, onDone) {
+  const h = box.querySelector('.sl2h'); let x0 = 0, max = 0, pos = 0, drag = false;
+  const set = x => { pos = x; h.style.transform = `translateX(${x}px)`; box.style.setProperty('--p', max ? x / max : 0); };
+  h.onpointerdown = e => { drag = true; x0 = e.clientX; max = box.clientWidth - h.clientWidth - 8; h.setPointerCapture(e.pointerId); h.style.transition = 'none'; };
+  h.onpointermove = e => { if (drag) set(Math.max(0, Math.min(max, e.clientX - x0))); };
+  const end = () => { if (!drag) return; drag = false; h.style.transition = 'transform .25s'; if (pos >= max * .85) { set(max); onDone(); } else set(0); };
+  h.onpointerup = end; h.onpointercancel = end;
+  h.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') onDone(); };
+}
 
 async function draw(el) {
   const d = ymd();
@@ -14,9 +24,12 @@ async function draw(el) {
     db.from('routine_logs').select('routine_id').eq('log_date', d)]);
   const head = header('งานวันนี้', new Date().toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'long' }));
   if (a.error) return el.innerHTML = head + `<div class="g"><div class="c" style="display:block"><b>ยังใช้งานไม่ได้</b><br><small>${esc(a.error.message)}</small><br><small>ตรวจว่ารัน sql/routines.sql ใน Supabase ครบทุกคำสั่งแล้ว</small></div></div>`;
-  const rt = a.data, dn = new Set((b.data ?? []).map(l => l.routine_id)), n = rt.filter(r => dn.has(r.id)).length;
+  const rt = a.data, dn = new Set((b.data ?? []).map(l => l.routine_id)), n = rt.filter(r => dn.has(r.id)).length, allDone = rt.length && n === rt.length;
   const again = (error, m) => { toast(error ? error.message : m); draw(el); };
-  el.innerHTML = head + `<div class="g"><div class="c" style="display:block"><b>ทำแล้ว ${n} จาก ${rt.length} รายการ</b><div class="bar"><i style="width:${rt.length ? Math.round(n / rt.length * 100) : 0}%"></i></div></div>` + (!editing && rt.length ? `<button class="b" id="all">${n === rt.length ? 'ยกเลิกเช็คทั้งหมด' : 'เช็คทั้งหมด'}</button>` : '') +
+  el.innerHTML = head + `<div class="g"><div class="c" style="display:block"><b>ทำแล้ว ${n} จาก ${rt.length} รายการ</b><div class="bar"><i style="width:${rt.length ? Math.round(n / rt.length * 100) : 0}%"></i></div></div>` +
+    (!editing && rt.length ? (allDone
+      ? `<div class="c" style="background:#DCFCE7"><div class="i s-approved">${ic('ok', 22)}</div><div class="t">ดำเนินการแล้วทั้งหมด<small>งานประจำวันนี้ครบแล้ว</small></div><button class="p" id="undo">ยกเลิก</button></div>`
+      : `<div class="sl2" id="slide"><div class="sl2t">เลื่อนเพื่อดำเนินการแล้วทั้งหมด</div><div class="sl2h" role="slider" tabindex="0" aria-label="เลื่อนเพื่อยืนยัน">${ic('check', 22)}</div></div>`) : '') +
     rt.map((r, i) => `<div class="c"><div class="i tone-${'wtdn'[i % 4]}">${ic('task', 20)}</div><div class="t">${esc(r.title)}<small>${dn.has(r.id) ? 'ทำแล้ว' : 'ยังไม่ได้ทำ'}</small></div>` + (editing
       ? `<button class="p" data-ed="${r.id}">${ic('pen', 16)} แก้</button><button class="p er" data-rm="${r.id}">${ic('trash', 16)} ลบ</button>`
       : `<button class="swt ${dn.has(r.id) ? 'on' : ''}" role="switch" aria-checked="${dn.has(r.id)}" aria-label="ทำแล้ว" data-rt="${r.id}"><i></i></button>`) + `</div>`).join('') +
@@ -24,10 +37,9 @@ async function draw(el) {
     (editing ? `<form id="rf" class="rowf"><input class="in" name="title" placeholder="เพิ่มรายการงานประจำ" required><button class="p on" style="min-height:52px;padding:0 18px">${ic('plus', 16)} เพิ่ม</button></form><button class="b o" id="sm">เพิ่มตัวอย่าง 10 รายการ</button>` : '') +
     `<button class="b ${editing ? '' : 'o'}" id="tg">${editing ? 'เสร็จสิ้นการแก้ไข' : 'แก้ไขรายการ'}</button></div>`;
   el.querySelector('#tg').onclick = () => { editing = !editing; draw(el); };
-  el.querySelector('#all')?.addEventListener('click', async () => {
-    const all = n === rt.length;
-    again((await (all ? db.from('routine_logs').delete().eq('log_date', d).in('routine_id', rt.map(r => r.id)) : db.from('routine_logs').insert(rt.filter(r => !dn.has(r.id)).map(r => ({ routine_id: r.id, log_date: d }))))).error, all ? 'ยกเลิกทั้งหมดแล้ว' : 'เช็คครบทุกรายการแล้ว');
-  });
+  const sl = el.querySelector('#slide');
+  if (sl) slider(sl, async () => again((await db.from('routine_logs').upsert(rt.filter(r => !dn.has(r.id)).map(r => ({ routine_id: r.id, log_date: d })), { onConflict: 'routine_id,log_date' })).error, 'ดำเนินการครบทุกรายการแล้ว'));
+  el.querySelector('#undo')?.addEventListener('click', async () => again((await db.from('routine_logs').delete().eq('log_date', d).in('routine_id', rt.map(r => r.id))).error, 'ยกเลิกทั้งหมดแล้ว'));
   el.querySelectorAll('[data-rt]').forEach(x => x.onclick = async () => {
     const rid = x.dataset.rt;
     again((await (dn.has(rid) ? db.from('routine_logs').delete().eq('routine_id', rid).eq('log_date', d) : db.from('routine_logs').insert({ routine_id: rid, log_date: d }))).error, 'บันทึกแล้ว');
