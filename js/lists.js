@@ -1,6 +1,7 @@
 import { esc, pill, sheet, lightbox } from './ui.js';
 import { thumb } from './image.js';
 import { ic } from './icons.js';
+import { db } from './db.js';
 const fmt = d => new Date(d).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
 
 export function showTasks(title, list) {
@@ -17,4 +18,12 @@ export function showTasks(title, list) {
 }
 export function showRoutines(rts, done) {
   sheet(`งานประจำวันนี้ (${rts.filter(r => done.has(r.id)).length}/${rts.length})`, rts.map(r => `<div class="c"><div class="ck ${done.has(r.id) ? 'y' : ''}">${done.has(r.id) ? '✓' : ''}</div><div class="t">${esc(r.title)}</div>${done.has(r.id) ? '<span class="p ok">ทำแล้ว</span>' : '<span class="p">ยังไม่ทำ</span>'}</div>`).join('') || '<div class="empty">ยังไม่มีรายการ</div>');
+}
+
+export async function showContacts() {
+  const r = await db.from('workers').select('*').eq('active', true);
+  const rows = (r.data ?? []).map(w => `<div class="c" style="display:block"><div style="display:flex;gap:12px;align-items:center">${w.photo_url ? `<img class="av lg" src="${esc(thumb(w.photo_url))}" alt="">` : `<div class="i" style="width:64px;height:64px">${ic('user', 28)}</div>`}<div class="t"><span style="font-size:18px">${esc(w.name)}</span><small>${esc(w.area || 'นักการภารโรง')}</small></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${w.phone ? `<a class="p on" href="tel:${esc(w.phone)}">${ic('phone', 14)} โทร ${esc(w.phone)}</a>` : ''}${w.line_id ? `<a class="p" href="https://line.me/ti/p/~${encodeURIComponent(w.line_id)}" target="_blank" rel="noopener">${ic('chat', 14)} LINE ${esc(w.line_id)}</a>` : ''}</div>
+    ${w.note ? `<small style="color:var(--mut);display:block;margin-top:8px">${esc(w.note)}</small>` : ''}${w.phone || w.line_id ? '' : '<small style="color:var(--mut);display:block;margin-top:8px">ยังไม่ได้เพิ่มข้อมูลติดต่อ (แตะรูปโปรไฟล์มุมขวาบนเพื่อเพิ่ม)</small>'}</div>`).join('');
+  sheet('ติดต่อนักการภารโรง', rows || '<div class="empty">ยังไม่มีข้อมูล</div>');
 }

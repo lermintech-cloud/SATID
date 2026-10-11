@@ -1,3 +1,4 @@
+import './install.js';
 import { esc, header } from './ui.js';
 import { ic } from './icons.js';
 import { loadMe, me } from './me.js';
@@ -7,12 +8,14 @@ const ROLES = {
   teacher:  { label: 'ครู',         icon: 'cap',    load: () => import('./views/teacher.js') },
   director: { label: 'ผู้อำนวยการ', icon: 'dash',   load: () => import('./views/director.js') },
   today:    { label: 'งานวันนี้',   icon: 'list',   load: () => import('./views/today.js') },
+  contact:  { label: 'ติดต่อ',      icon: 'phone',  action: () => import('./lists.js').then(m => m.showContacts()) },
+  settings: { label: 'ตั้งค่า',     icon: 'gear',   load: () => import('./views/settings.js') },
   profile:  { label: 'โปรไฟล์',     icon: 'user',   load: () => import('./views/profile.js') },
 };
 // แถบเมนูล่าง: [คีย์, ป้าย, ไอคอน] ปุ่มกลาง (ภารโรง) เป็นปุ่มนูน
 const NAV = [['home', 'หน้าแรก', 'home'], ['today', 'งานวันนี้', 'list'], ['worker', 'ภารโรง', 'wrench'], ['teacher', 'ครู', 'cap'], ['director', 'ผอ.', 'dash']];
-const TONE = { worker: 'w', teacher: 't', director: 'd', today: 'n' };
-const THEMES = { home: '#0B5D57', worker: '#047857', teacher: '#1E40AF', director: '#5B21B6', today: '#C2410C', profile: '#0B5D57' };
+const TONE = { worker: 'w', teacher: 't', director: 'd', today: 'n', contact: 'c', settings: 's' };
+const THEMES = { home: '#0B5D57', worker: '#047857', teacher: '#1E40AF', director: '#5B21B6', today: '#C2410C', profile: '#0B5D57', settings: '#334155' };
 const app = document.getElementById('app'), nav = document.getElementById('nav');
 
 function setTheme(k) {
@@ -31,13 +34,14 @@ function landing() {
   import('./views/dashboard.js').then(m => m.renderDashboard(document.getElementById('dash'))).catch(() => {});
 }
 async function go(k) {
+  if (ROLES[k].action) return ROLES[k].action();
   localStorage.setItem('role', k); setTheme(k); refreshBell(true);
   app.innerHTML = `<div class="empty">กำลังโหลด…</div>`;
   try { (await ROLES[k].load()).render(app); }
   catch (e) { app.innerHTML = header('เกิดข้อผิดพลาด', esc(e.message)) + `<div class="g"><button class="b" onclick="location.reload()">ลองใหม่</button></div>`; }
 }
 document.addEventListener('click', e => { if (e.target.closest('[data-me]')) { scrollTo(0, 0); go('profile'); } else if (e.target.closest('[data-bell]')) openNotifs(go); });
-ROLES[localStorage.getItem('role')] ? go(localStorage.getItem('role')) : landing();
-loadMe().then(async () => { await refreshBell(true); const d = new Date().toLocaleDateString('sv-SE'); if (me.bell && localStorage.getItem('notifDay') !== d) { localStorage.setItem('notifDay', d); openNotifs(go); } });
+landing(); // เปิดแอปครั้งไหนก็เริ่มที่หน้าแรกเสมอ
+loadMe().then(async () => { await refreshBell(true); const d = new Date().toLocaleDateString('sv-SE'); if (me.bell && localStorage.getItem('notifAuto') !== '0' && localStorage.getItem('notifDay') !== d) { localStorage.setItem('notifDay', d); openNotifs(go); } });
 setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 450); }, 1500);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
