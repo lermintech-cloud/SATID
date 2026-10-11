@@ -17,11 +17,11 @@ export async function render(el) {
   const { data: tasks, error } = await db.from('tasks').select('*').eq('worker_id', id).order('due_at');
   if (error) return el.innerHTML = header('ผิดพลาด', esc(error.message));
   const done = tasks.filter(t => ['submitted', 'approved'].includes(t.status)).length;
-  el.innerHTML = header('งานของฉัน', `ส่งแล้ว ${done} จาก ${tasks.length} งาน`) + `<div class="g"><div class="bar"><i style="width:${tasks.length ? Math.round(done / tasks.length * 100) : 0}%"></i></div>` +
+  el.innerHTML = header('งานของฉัน', `เสร็จแล้ว ${done} จาก ${tasks.length} งาน`) + `<div class="g"><div class="bar"><i style="width:${tasks.length ? Math.round(done / tasks.length * 100) : 0}%"></i></div>` +
     (tasks.length ? tasks.map(t => `<button class="c" data-t="${t.id}"><div class="i s-${t.status}">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.detail || '')}</small></div>${pill(t.status)}</button>`).join('') : `<div class="empty">ยังไม่มีงานมอบหมาย</div>`) + `</div>`;
   el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
     const t = tasks.find(x => x.id === b.dataset.t);
-    if (['submitted', 'approved'].includes(t.status)) return toast('งานนี้ส่งแล้ว');
+    if (['submitted', 'approved'].includes(t.status)) return toast('งานนี้เสร็จแล้ว');
     detail(el, t);
   });
 }
@@ -51,8 +51,8 @@ function detail(el, t) {
   });
   el.querySelector('#ok').onclick = async () => {
     if (!t.photo_before_url || !t.photo_after_url) return toast('ต้องมีรูปก่อนและหลังทำ');
-    const { error } = await db.from('tasks').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', t.id);
-    toast(error ? error.message : 'ส่งงานแล้ว'); render(el);
+    const { error } = await db.from('tasks').update({ status: 'approved', submitted_at: new Date().toISOString() }).eq('id', t.id);
+    toast(error ? error.message : 'บันทึกงานเสร็จแล้ว'); render(el);
   };
   el.querySelector('#bk').onclick = () => render(el);
 }
