@@ -171,3 +171,10 @@ body[data-theme=settings]{--a:#334155;--a2:#475569;--a3:#94A3B8;--tint:#E2E8F0;-
 .sl2h{position:absolute;left:4px;top:4px;width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#16A34A,#34D399);color:#fff;display:grid;place-items:center;box-shadow:0 4px 12px #16a34a55;cursor:grab;touch-action:none}
 .ib{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 104px);width:min(calc(100% - 24px),456px);z-index:7;background:#fff;border-radius:20px;box-shadow:0 10px 30px #0b1f2430;padding:10px 12px;display:flex;align-items:center;gap:10px;animation:up .4s both}
 .ib img{border-radius:10px}.ib .t{flex:1;font-size:14px;line-height:1.3}.ib small{font-size:12px}
+/* ===== แท็บ / สถานะคิวออฟไลน์ ===== */
+.tabs{display:flex;background:#fff;border-radius:99px;padding:4px;box-shadow:0 6px 20px var(--glow)}
+.tabs button{flex:1;border:0;background:none;border-radius:99px;padding:10px 6px;font-weight:700;font-size:14px;color:var(--mut);cursor:pointer}
+.tabs button.on{background:linear-gradient(135deg,var(--a),var(--a2));color:#fff}
+#qb{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 100px);z-index:7;background:#1E293B;color:#fff;padding:8px 14px;border-radius:99px;font-size:13px;box-shadow:0 8px 24px #0004;white-space:nowrap}
+#qb[hidden]{display:none}#qb button{border:0;background:#34D399;color:#064E3B;border-radius:99px;padding:2px 10px;font-weight:700;margin-left:6px;cursor:pointer}
+.ib{bottom:calc(env(safe-area-inset-bottom) + 156px)}

@@ -1,11 +1,12 @@
 import './install.js';
+import { initQueue } from './queue.js';
 import { esc, header } from './ui.js';
 import { ic } from './icons.js';
 import { loadMe, me } from './me.js';
 import { refreshBell, openNotifs } from './notify.js';
 const ROLES = {
-  worker:   { label: 'ภารโรง',      icon: 'wrench', load: () => import('./views/worker.js') },
-  teacher:  { label: 'ครู',         icon: 'cap',    load: () => import('./views/teacher.js') },
+  worker:   { label: 'ภารโรงรายงาน', icon: 'wrench', load: () => import('./views/worker.js') },
+  teacher:  { label: 'งานพิเศษ',     icon: 'cap',    load: () => import('./views/teacher.js') },
   director: { label: 'ผู้อำนวยการ', icon: 'dash',   load: () => import('./views/director.js') },
   today:    { label: 'งานวันนี้',   icon: 'list',   load: () => import('./views/today.js') },
   contact:  { label: 'ติดต่อ',      icon: 'phone',  action: () => import('./lists.js').then(m => m.showContacts()) },
@@ -13,7 +14,7 @@ const ROLES = {
   profile:  { label: 'โปรไฟล์',     icon: 'user',   load: () => import('./views/profile.js') },
 };
 // แถบเมนูล่าง: [คีย์, ป้าย, ไอคอน] ปุ่มกลาง (ภารโรง) เป็นปุ่มนูน
-const NAV = [['home', 'หน้าแรก', 'home'], ['today', 'งานวันนี้', 'list'], ['worker', 'ภารโรง', 'wrench'], ['teacher', 'ครู', 'cap'], ['director', 'ผอ.', 'dash']];
+const NAV = [['home', 'หน้าแรก', 'home'], ['today', 'งานวันนี้', 'list'], ['worker', 'รายงาน', 'wrench'], ['teacher', 'งานพิเศษ', 'cap'], ['director', 'ผอ.', 'dash']];
 const TONE = { worker: 'w', teacher: 't', director: 'd', today: 'n', contact: 'c', settings: 's' };
 const THEMES = { home: '#0B5D57', worker: '#047857', teacher: '#1E40AF', director: '#5B21B6', today: '#C2410C', profile: '#0B5D57', settings: '#334155' };
 const app = document.getElementById('app'), nav = document.getElementById('nav');
@@ -42,6 +43,7 @@ async function go(k) {
 }
 document.addEventListener('click', e => { if (e.target.closest('[data-me]')) { scrollTo(0, 0); go('profile'); } else if (e.target.closest('[data-bell]')) openNotifs(go); });
 landing(); // เปิดแอปครั้งไหนก็เริ่มที่หน้าแรกเสมอ
+initQueue();
 loadMe().then(async () => { await refreshBell(true); const d = new Date().toLocaleDateString('sv-SE'); if (me.bell && localStorage.getItem('notifAuto') !== '0' && localStorage.getItem('notifDay') !== d) { localStorage.setItem('notifDay', d); openNotifs(go); } });
 setTimeout(() => { const s = document.getElementById('splash'); s.classList.add('hide'); setTimeout(() => s.remove(), 450); }, 1500);
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');

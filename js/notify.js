@@ -1,4 +1,4 @@
-// กระดิ่งแจ้งเตือน: สรุปเรื่องที่ภารโรงต้องทำ + เด้งอัตโนมัติเมื่อเข้าใช้ครั้งแรกของวัน
+// กระดิ่งแจ้งเตือน: แจ้งเฉพาะ "งานค้าง" และ "งานประจำวัน" + เด้งอัตโนมัติเมื่อเข้าใช้ครั้งแรกของวัน
 import { db } from './db.js';
 import { me } from './me.js';
 import { esc, sheet } from './ui.js';
@@ -10,11 +10,8 @@ export async function refreshBell() {
   let q = db.from('tasks').select('status,due_at').in('status', ['todo', 'doing', 'rejected']);
   if (me.id) q = q.eq('worker_id', me.id);
   const [t, rt, lg] = await Promise.all([q, db.from('routines').select('id').eq('active', true), db.from('routine_logs').select('routine_id').eq('log_date', today())]);
-  const open = t.data ?? [], list = [], n = s => open.filter(x => x.status === s).length;
-  const late = open.filter(x => x.due_at && new Date(x.due_at) < Date.now()).length;
-  if (n('rejected')) list.push({ c: 's-rejected', t: `มีงานถูกตีกลับ ${n('rejected')} งาน`, s: 'ถ่ายรูปและส่งใหม่', go: 'worker' });
-  if (late) list.push({ c: 's-doing', t: `งานเกินกำหนด ${late} งาน`, s: 'รีบทำให้เสร็จ', go: 'worker' });
-  if (n('todo')) list.push({ c: 's-todo', t: `งานใหม่ที่ยังไม่ได้เริ่ม ${n('todo')} งาน`, s: 'เปิดดูรายการงาน', go: 'worker' });
+  const open = t.data ?? [], list = [], late = open.filter(x => x.due_at && new Date(x.due_at) < Date.now()).length;
+  if (open.length) list.push({ c: 's-doing', t: `งานค้าง ${open.length} งาน`, s: late ? `เกินกำหนด ${late} งาน` : 'เปิดดูรายการงาน', go: 'worker' });
   const ids = new Set((rt.data ?? []).map(r => r.id)), dn = (lg.data ?? []).filter(l => ids.has(l.routine_id)).length;
   if (!rt.error && ids.size && dn < ids.size) list.push({ c: 'tone-n', t: `งานประจำวันนี้ยังไม่ครบ (${dn}/${ids.size})`, s: 'แตะเพื่อไปเช็ค', go: 'today' });
   items = list; me.bell = list.length;

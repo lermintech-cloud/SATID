@@ -10,7 +10,7 @@ export async function render(el) {
     db.from('tasks').select('*,workers(name)').order('created_at', { ascending: false }).limit(100)]);
   if (error) return el.innerHTML = header('ผิดพลาด', esc(error.message));
   const done = (e, m) => { toast(e ? e.message : m); render(el); };
-  el.innerHTML = header('ครู', 'มอบหมาย แก้ไข และติดตามงาน') + `<div class="g">
+  el.innerHTML = header('งานพิเศษ', 'มอบหมาย แก้ไข และติดตามงาน') + `<div class="g">
     <form id="f" class="f"><input class="in" name="title" placeholder="ชื่องาน" required><input class="in" name="detail" placeholder="รายละเอียด (ถ้ามี)">
     <select class="in" name="worker_id" required>${ws.filter(w => w.active).map(w => `<option value="${w.id}">${esc(w.name)}</option>`).join('')}</select>
     <input class="in" type="datetime-local" name="due_at"><button class="b">มอบหมายงาน</button></form>
