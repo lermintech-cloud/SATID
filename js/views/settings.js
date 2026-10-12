@@ -69,9 +69,14 @@ async function panel(el, pin, S) {
   el.querySelector('#tt').onclick = async () => {
     let er = await save(); if (er) return toast(er.message);
     const r = await db.rpc('telegram_test', { p: pin }); if (r.error) return toast(r.error.message);
-    toast('กำลังส่งข้อความทดสอบ…'); await new Promise(x => setTimeout(x, 2500));
-    const q = await db.rpc('telegram_result', { p: pin, rid: r.data }); const s = q.data?.status;
-    toast(q.error ? q.error.message : s === 200 ? 'ส่งสำเร็จ ตรวจใน Telegram ได้เลย' : s ? `Telegram ตอบกลับ ${s}: ${q.data.body}` : 'ยังไม่ได้ผลตอบกลับ ลองกดตรวจอีกครั้งในสักครู่');
+    toast('กำลังส่งข้อความทดสอบ…');
+    let q, s, waited = 0;
+    while (waited < 12000 && !s) {
+      await new Promise(x => setTimeout(x, 1000)); waited += 1000;
+      q = await db.rpc('telegram_result', { p: pin, rid: r.data }); s = q.data?.status;
+      if (q.error) break;
+    }
+    toast(q?.error ? q.error.message : s === 200 ? 'ส่งสำเร็จ ตรวจใน Telegram ได้เลย' : s ? `Telegram ตอบกลับ ${s}: ${q.data.body}` : 'ยังไม่ได้ผลตอบกลับ ตรวจว่าเปิด pg_net ใน Supabase แล้ว');
   };
   el.querySelector('#tn').onclick = async () => { let er = await save(); if (!er) er = (await db.rpc('reminders_now', { p: pin })).error; toast(er ? er.message : 'สั่งส่งสรุปแล้ว ตรวจใน Telegram'); };
   el.querySelector('#rf').onsubmit = async e => { e.preventDefault(); again((await db.from('routines').insert({ title: new FormData(e.target).get('title').trim(), sort: rts.length + 1 })).error, 'เพิ่มรายการแล้ว'); };
