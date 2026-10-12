@@ -25,6 +25,11 @@ button.p{cursor:pointer;min-height:36px}
 .landing{animation:up .5s both}@keyframes up{from{opacity:0;transform:translateY(10px)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .sec{font-weight:700;margin-top:6px}
+.pg{display:flex;align-items:center;justify-content:center;gap:6px;margin:-2px 0 2px}
+.pg-n{min-width:34px;height:34px;border:0;border-radius:50%;background:#fff;color:var(--mut);font-weight:700;cursor:pointer;box-shadow:0 3px 10px #0b1f2410}
+.pg-n.on{background:var(--a2,#14867D);color:#fff;box-shadow:0 4px 12px var(--glow,#14867d33)}
+.pg-n:disabled{opacity:.4;cursor:default}
+.recent-list{display:flex;flex-direction:column;gap:12px}
 .av{width:46px;height:46px;border-radius:14px;object-fit:cover;background:#E3F4F1;display:grid;place-items:center;font-weight:700;color:var(--pri);flex:none}
 .rk{display:flex;justify-content:space-between;padding:6px 0}
 .slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:160px;border:2px dashed #94A3B8;border-radius:20px;background:#fff;font-size:18px;cursor:pointer;overflow:hidden}
