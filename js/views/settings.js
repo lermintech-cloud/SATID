@@ -42,7 +42,7 @@ async function panel(el, pin, S) {
       <input class="in" name="tg_token" type="password" autocomplete="off" placeholder="${S.tg_token_set ? 'Bot token ตั้งไว้แล้ว (เว้นว่างเพื่อใช้ค่าเดิม)' : 'Bot token จาก @BotFather'}">
       <input class="in" name="tg_chat_id" value="${esc(S.tg_chat_id || '')}" placeholder="Group / Chat ID เช่น -1001234567890">
       <div class="rowf"><input class="in" type="time" name="tg_time1" value="${esc(S.tg_time1 || '07:30')}"><input class="in" type="time" name="tg_time2" value="${esc(S.tg_time2 || '15:30')}"></div>
-      ${row('send', 'เปิดการส่งอัตโนมัติ', 'ส่งตามเวลาสองรอบด้านบน', sw('tg_enabled', on('tg_enabled')))}
+      ${row('send', 'เปิดการแจ้งเตือน Telegram', 'ส่งตามเวลา และเมื่อมีงานใหม่/ส่งงาน', sw('tg_enabled', on('tg_enabled')))}
       ${row('task', 'แจ้ง งานค้าง', 'รายการงานที่ยังไม่เสร็จ', sw('tg_pending', on('tg_pending')))}
       ${row('list', 'แจ้ง งานประจำวัน', 'ที่ยังไม่ได้ติ๊ก', sw('tg_routine', on('tg_routine')))}
       <button class="b">บันทึกการตั้งค่า</button>
