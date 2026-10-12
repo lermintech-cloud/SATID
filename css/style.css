@@ -183,3 +183,21 @@ body[data-theme=settings]{--a:#334155;--a2:#475569;--a3:#94A3B8;--tint:#E2E8F0;-
 #qb{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 100px);z-index:7;background:#1E293B;color:#fff;padding:8px 14px;border-radius:99px;font-size:13px;box-shadow:0 8px 24px #0004;white-space:nowrap}
 #qb[hidden]{display:none}#qb button{border:0;background:#34D399;color:#064E3B;border-radius:99px;padding:2px 10px;font-weight:700;margin-left:6px;cursor:pointer}
 .ib{bottom:calc(env(safe-area-inset-bottom) + 156px)}
+/* ===== เมนูล่างโทนโมเดิร์น: ปุ่มทั้ง 5 มีสีประจำเมนู ===== */
+#nav{background:linear-gradient(135deg,#123D4B 0%,#0F6470 52%,#23527E 100%);border:1px solid #ffffff26;box-shadow:0 -10px 28px #0b253a50;overflow:visible;padding:11px 7px calc(env(safe-area-inset-bottom) + 9px)}
+#nav::before{content:'';position:absolute;inset:0;border-radius:26px 26px 0 0;background:linear-gradient(90deg,#ffffff0d,transparent 42%,#ffffff12);pointer-events:none}
+#nav button{--nav-accent:#2DD4BF;--nav-accent2:#14B8A6;--nav-tint:#ffffff1c;position:relative;z-index:1;margin:0 1px;padding:5px 2px 4px;min-height:60px;border-radius:18px;color:#D8F3F0;letter-spacing:-.1px;transition:background .18s,transform .18s,color .18s}
+#nav button .ni{width:38px;height:38px;border:1px solid #ffffff24;border-radius:14px;background:#ffffff12;box-shadow:inset 0 1px #ffffff1c;transition:transform .18s,background .18s,box-shadow .18s}
+#nav button:nth-child(1){--nav-accent:#2DD4BF;--nav-accent2:#0EA5A1}
+#nav button:nth-child(2){--nav-accent:#FCD34D;--nav-accent2:#F97316}
+#nav button:nth-child(3){--nav-accent:#6EE7B7;--nav-accent2:#16A34A}
+#nav button:nth-child(4){--nav-accent:#93C5FD;--nav-accent2:#2563EB}
+#nav button:nth-child(5){--nav-accent:#C4B5FD;--nav-accent2:#7C3AED}
+#nav button.on:not(.nc){color:#fff;background:var(--nav-tint);box-shadow:inset 0 1px #ffffff24,0 5px 12px #041d2840}
+#nav button.on:not(.nc) .ni{background:linear-gradient(135deg,var(--nav-accent),var(--nav-accent2));border-color:#ffffff48;box-shadow:0 5px 12px #031d2d55}
+#nav button.on:not(.nc) .ni{transform:translateY(-2px)}
+#nav .nc .ni,#nav .nc:not(.on) .ni{width:62px;height:62px;margin-top:-36px;background:linear-gradient(135deg,#22C55E,#059669);border:2px solid #D1FAE5;color:#fff;box-shadow:0 9px 21px #062f285c,0 0 0 5px #d9f8f3}
+#nav .nc.on{color:#fff;text-shadow:0 1px 4px #062f28}
+#nav .nc.on .ni{background:linear-gradient(135deg,#4ADE80,#059669);box-shadow:0 10px 24px #062f2870,0 0 0 5px #fff}
+#nav button:active{transform:translateY(1px)}
+#nav button:active .ni{transform:scale(.92)}
