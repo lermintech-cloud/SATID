@@ -2,6 +2,8 @@ import { avatar, me } from './me.js';
 import { ic } from './icons.js';
 export const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 export const ST = { todo: ['รอทำ', ''], doing: ['กำลังทำ', 'wn'], submitted: ['รอตรวจ', 'wn'], approved: ['เสร็จแล้ว', 'ok'], rejected: ['ตีกลับ', 'er'] };
+export const fmtDue = d => new Date(d).toLocaleString('th-TH', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+export const dueTag = t => ` · <b style="color:#DC2626">กำหนด ${fmtDue(t.due_at)}</b>`;
 export const pill = s => `<span class="p ${ST[s]?.[1] ?? ''}">${ST[s]?.[0] ?? s}</span>`;
 export const header = (t, s) => `<div class="h"><div class="brand"><span class="lg"><img src="img/logo-v2.webp" alt="" width="30" height="30"></span><span>โรงเรียนบ้านไร่</span></div><button class="me" data-me aria-label="โปรไฟล์">${avatar()}</button><button class="bell" data-bell aria-label="แจ้งเตือน">${ic('bell', 20)}<i class="bdg" ${me.bell ? '' : 'hidden'}>${me.bell || ''}</i></button><h1>${t}</h1><p>${s}</p></div>`;
 export function toast(m) {

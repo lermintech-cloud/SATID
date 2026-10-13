@@ -1,5 +1,5 @@
 import { db } from '../db.js';
-import { esc, header, pill } from '../ui.js';
+import { esc, header, pill, dueTag } from '../ui.js';
 import { ic } from '../icons.js';
 import { showTasks, showRoutines } from '../lists.js';
 const DAYS = 14, ymd = d => new Date(d).toLocaleDateString('sv-SE');
@@ -31,7 +31,7 @@ export async function render(el) {
     <div class="lg"><span><i style="background:#A5B4FC"></i>มอบหมาย</span><span><i style="background:#34D399"></i>ส่งงาน</span></div>
     ${peakDay ? `<small style="color:var(--mut)">วันที่มอบหมายมากที่สุด: ${new Date(peakDay).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })} (${peak} งาน)</small>` : ''}</div>
     <p class="sec">งานค้างและรอตรวจ</p>` +
-    ([...late, ...open.filter(t => !late.includes(t)), ...wait].slice(0, 15).map(t => `<div class="c"><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${late.includes(t) ? ' · <b style="color:#DC2626">เกินกำหนด</b>' : ''}</small></div>${pill(t.status)}</div>`).join('') || `<div class="empty">ไม่มีงานค้าง</div>`) + `</div>`;
+    ([...late, ...open.filter(t => !late.includes(t)), ...wait].slice(0, 15).map(t => `<div class="c"><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${late.includes(t) ? dueTag(t) : ''}</small></div>${pill(t.status)}</div>`).join('') || `<div class="empty">ไม่มีงานค้าง</div>`) + `</div>`;
   const dnIds = new Set((r3.data ?? []).map(l => l.routine_id));
   el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => ({ done: () => showTasks('งานที่เสร็จ', doneL), doing: () => showTasks('กำลังทำ', doingL), open: () => showTasks('งานค้าง', open), rt: () => showRoutines(r2.data ?? [], dnIds) })[b.dataset.k]());
 }

@@ -8,7 +8,7 @@ export function showTasks(title, list) {
   const rows = list.map((t, i) => {
     const late = t.due_at && !['approved', 'submitted'].includes(t.status) && new Date(t.due_at) < Date.now();
     const when = t.status === 'approved' && t.submitted_at ? 'เสร็จ ' + fmt(t.submitted_at) : t.due_at ? 'กำหนด ' + fmt(t.due_at) : '';
-    return `<button class="c" data-i="${i}">${t.photo_after_url ? `<img class="av" src="${esc(thumb(t.photo_after_url))}" alt="">` : `<div class="i s-${t.status}">${ic('task')}</div>`}<div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${when ? ' · ' + when : ''}${late ? ' · <b style="color:#DC2626">เกินกำหนด</b>' : ''}</small></div>${pill(t.status)}</button>`;
+    return `<button class="c" data-i="${i}">${t.photo_after_url ? `<img class="av" src="${esc(thumb(t.photo_after_url))}" alt="">` : `<div class="i s-${t.status}">${ic('task')}</div>`}<div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${when ? ' · ' + (late ? `<b style="color:#DC2626">${when}</b>` : when) : ''}</small></div>${pill(t.status)}</button>`;
   }).join('');
   const o = sheet(`${title} (${list.length})`, rows || '<div class="empty">ไม่มีรายการ</div>');
   o.querySelectorAll('[data-i]').forEach(b => b.onclick = () => {

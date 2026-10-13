@@ -201,3 +201,7 @@ body[data-theme=settings]{--a:#334155;--a2:#475569;--a3:#94A3B8;--tint:#E2E8F0;-
 #nav .nc.on .ni{background:linear-gradient(135deg,#4ADE80,#059669);box-shadow:0 10px 24px #062f2870,0 0 0 5px #fff}
 #nav button:active{transform:translateY(1px)}
 #nav button:active .ni{transform:scale(.92)}
+
+/* ===== การ์ดงานพิเศษ: เสร็จ=เขียวพาสเทล / รอทำ=แดงพาสเทล ===== */
+body .g .c.tk-dn{background:#ECFDF3;border-left:4px solid #86EFAC}
+body .g .c.tk-wt{background:#FFF1F1;border-left:4px solid #FCA5A5}

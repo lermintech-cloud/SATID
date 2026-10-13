@@ -1,8 +1,10 @@
 import { db } from '../db.js';
-import { esc, pill, toast, header, sheet, ST } from '../ui.js';
+import { esc, pill, toast, header, sheet, ST, fmtDue } from '../ui.js';
 import { ic } from '../icons.js';
 const link = (u, l) => u ? ` · <a href="${esc(u)}" target="_blank" rel="noopener" style="color:var(--pri)">${l}</a>` : '';
 const loc = d => d ? new Date(new Date(d) - new Date(d).getTimezoneOffset() * 6e4).toISOString().slice(0, 16) : '';
+
+let tab = 'todo';
 
 export async function render(el) {
   const [{ data: ws = [] }, { data: ts, error }] = await Promise.all([
@@ -10,14 +12,17 @@ export async function render(el) {
     db.from('tasks').select('*,workers(name)').order('created_at', { ascending: false }).limit(100)]);
   if (error) return el.innerHTML = header('ผิดพลาด', esc(error.message));
   const done = (e, m) => { toast(e ? e.message : m); render(el); };
+  const isDone = tab === 'done', doneT = ts.filter(t => t.status === 'approved'), todoT = ts.filter(t => t.status !== 'approved'), shown = isDone ? doneT : todoT;
   el.innerHTML = header('งานพิเศษ', 'มอบหมาย แก้ไข และติดตามงาน') + `<div class="g">
     <form id="f" class="f"><input class="in" name="title" placeholder="ชื่องาน" required><input class="in" name="detail" placeholder="รายละเอียด (ถ้ามี)">
     <select class="in" name="worker_id" required>${ws.filter(w => w.active).map(w => `<option value="${w.id}">${esc(w.name)}</option>`).join('')}</select>
     <input class="in" type="datetime-local" name="due_at"><button class="b">มอบหมายงาน</button></form>
-    <p class="sec">รายการงานทั้งหมด (${ts.length})</p>` +
-    ts.map(t => `<div class="c"><div class="i s-${t.status}">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${link(t.photo_before_url, 'ก่อน')}${link(t.photo_after_url, 'หลัง')}</small></div>` +
+    <p class="sec">รายการงานทั้งหมด (${ts.length})</p>
+    <div class="tabs"><button data-tab="todo" class="${isDone ? '' : 'on'}">รอทำ (${todoT.length})</button><button data-tab="done" class="${isDone ? 'on' : ''}">เสร็จแล้ว (${doneT.length})</button></div>` +
+    (shown.map(t => `<div class="c ${isDone ? 'tk-dn' : 'tk-wt'}"><div class="i s-${t.status}">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${t.due_at ? ` · <span${!isDone && new Date(t.due_at) < Date.now() ? ' style="color:#DC2626;font-weight:700"' : ''}>กำหนด ${fmtDue(t.due_at)}</span>` : ''}${link(t.photo_before_url, 'ก่อน')}${link(t.photo_after_url, 'หลัง')}</small></div>` +
       (t.status === 'submitted' ? `<button class="p ok" data-a="approved" data-id="${t.id}">อนุมัติ</button><button class="p er" data-a="rejected" data-id="${t.id}">ตีกลับ</button>` : pill(t.status)) +
-      `<button class="p" data-m="${t.id}" aria-label="จัดการงาน">${ic('more', 18)}</button></div>`).join('') + `</div>`;
+      `<button class="p" data-m="${t.id}" aria-label="จัดการงาน">${ic('more', 18)}</button></div>`).join('') || `<div class="empty">${isDone ? 'ยังไม่มีงานที่เสร็จ' : 'ไม่มีงานที่รอทำ'}</div>`) + `</div>`;
+  el.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; render(el); });
   el.querySelector('#f').onsubmit = async e => {
     e.preventDefault(); const f = Object.fromEntries(new FormData(e.target));
     f.due_at ? f.due_at = new Date(f.due_at).toISOString() : delete f.due_at; if (!f.detail) delete f.detail;

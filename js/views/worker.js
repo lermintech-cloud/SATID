@@ -1,6 +1,6 @@
 import { db } from '../db.js';
 import { prepPhoto, sendPhoto, thumb } from '../image.js';
-import { esc, pill, toast, header, busy } from '../ui.js';
+import { esc, pill, toast, header, busy, dueTag } from '../ui.js';
 import { ic } from '../icons.js';
 import { add, flush, isNet, cget, cset, patchTask } from '../queue.js';
 let tab = 'todo';
@@ -30,7 +30,7 @@ async function list(el) {
   const isDone = tab === 'done', T = isDone ? doneT : todoT, R = isDone ? doneR : todoR;
   el.innerHTML = header('ภารโรงรายงาน', offline ? 'ออฟไลน์ · แสดงข้อมูลล่าสุดในเครื่อง' : 'รายงานงานของฉัน') +
     `<div class="g"><div class="tabs"><button data-tab="todo" class="${isDone ? '' : 'on'}">ยังไม่ได้ทำ (${todoT.length + todoR.length})</button><button data-tab="done" class="${isDone ? 'on' : ''}">เสร็จแล้ว (${doneT.length + doneR.length})</button></div>` +
-    T.map(t => `<button class="c" data-t="${t.id}"><div class="i s-${t.status}">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.detail || '')}${!isDone && t.due_at && new Date(t.due_at) < Date.now() ? ' · <b style="color:#DC2626">เกินกำหนด</b>' : ''}</small></div>${pill(t.status)}</button>`).join('') +
+    T.map(t => `<button class="c" data-t="${t.id}"><div class="i s-${t.status}">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.detail || '')}${!isDone && t.due_at && new Date(t.due_at) < Date.now() ? dueTag(t) : ''}</small></div>${pill(t.status)}</button>`).join('') +
     R.map(r => `<div class="c"><div class="i tone-n">${ic('list', 20)}</div><div class="t">${esc(r.title)}<small>งานประจำวัน${isDone ? ' · ทำแล้ว' : ''}</small></div></div>`).join('') +
     (T.length + R.length ? '' : `<div class="empty">${isDone ? 'ยังไม่มีงานที่เสร็จ' : 'ไม่มีงานค้าง เยี่ยมมาก'}</div>`) + `</div>`;
   el.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; list(el); });
