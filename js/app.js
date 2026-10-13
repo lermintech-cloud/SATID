@@ -19,6 +19,11 @@ const TONE = { worker: 'w', teacher: 't', director: 'd', today: 'n', contact: 'c
 const THEMES = { home: '#0B5D57', worker: '#047857', teacher: '#1E40AF', director: '#5B21B6', today: '#C2410C', profile: '#0B5D57', settings: '#334155' };
 const app = document.getElementById('app'), nav = document.getElementById('nav');
 
+const bell = document.createElement('button');
+bell.className = 'bell fl'; bell.setAttribute('data-bell', ''); bell.setAttribute('aria-label', 'แจ้งเตือน');
+bell.innerHTML = `${ic('bell', 22)}<i class="bdg" hidden></i>`;
+document.body.append(bell);
+
 function setTheme(k) {
   document.body.dataset.theme = k; document.querySelector('meta[name=theme-color]').content = THEMES[k];
   nav.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.n === k));

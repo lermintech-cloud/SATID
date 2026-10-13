@@ -14,7 +14,7 @@ export async function render(el) {
   const rDone = (r3.data ?? []).filter(l => ids.has(l.routine_id)).length;
   const open = ts.filter(t => ['todo', 'doing', 'rejected'].includes(t.status));
   const wait = ts.filter(t => t.status === 'submitted');
-  const doneL = ts.filter(t => t.status === 'approved'), doingL = ts.filter(t => t.status === 'doing');
+  const doneL = ts.filter(t => t.status === 'approved');
   const late = open.filter(t => t.due_at && new Date(t.due_at) < now);
   const days = [...Array(DAYS)].map((_, i) => ymd(now - (DAYS - 1 - i) * 864e5));
   const cnt = f => days.map(d => ts.filter(t => t[f] && ymd(t[f]) === d).length);
@@ -23,8 +23,8 @@ export async function render(el) {
   const idle = !open.length && !wait.length;
   const bar = (v, c) => `<i style="height:${Math.max(3, v / mx * 100)}%;background:${c}" title="${v}"></i>`;
   el.innerHTML = header('ผู้อำนวยการ', 'ภาพรวมงานภารโรง') + `<div class="g">
-    <div class="c" style="background:${idle ? '#F0FDF4' : '#FFFBEB'}"><div class="i ${idle ? 's-approved' : 's-doing'}">${ic(idle ? 'ok' : 'wrench', 26)}</div><div class="t">${idle ? 'ภารโรงว่าง ไม่มีงานค้าง' : `มีงานค้าง ${open.length} งาน`}<small>${late.length ? `เกินกำหนด ${late.length} งาน` : 'ไม่มีงานเกินกำหนด'} · กำลังทำ ${doingL.length}</small></div></div>
-    <div class="st"><div data-k="done" role="button" tabindex="0"><b style="color:#16A34A">${doneL.length}</b>เสร็จ</div><div data-k="doing" role="button" tabindex="0"><b style="color:#F59E0B">${doingL.length}</b>กำลังทำ</div><div data-k="open" role="button" tabindex="0"><b style="color:#DC2626">${open.length}</b>ค้าง</div><div data-k="rt" role="button" tabindex="0"><b>${rDone}/${ids.size}</b>งานประจำ</div></div>
+    <div class="c" style="background:${idle ? '#F0FDF4' : '#FFFBEB'}"><div class="i ${idle ? 's-approved' : 's-doing'}">${ic(idle ? 'ok' : 'wrench', 26)}</div><div class="t">${idle ? 'ภารโรงว่าง ไม่มีงานค้าง' : `มีงานค้าง ${open.length} งาน`}<small>${late.length ? `เกินกำหนด ${late.length} งาน` : 'ไม่มีงานเกินกำหนด'}</small></div></div>
+    <div class="st"><div data-k="done" role="button" tabindex="0"><b style="color:#16A34A">${doneL.length}</b>เสร็จ</div><div data-k="open" role="button" tabindex="0"><b style="color:#DC2626">${open.length}</b>ค้าง</div><div data-k="rt" role="button" tabindex="0"><b>${rDone}/${ids.size}</b>งานประจำ</div></div>
     <p class="sec">ปริมาณงาน ${DAYS} วันล่าสุด</p>
     <div class="c" style="display:block"><div class="ch">${days.map((d, i) => `<div>${bar(as[i], '#A5B4FC')}${bar(dn[i], '#34D399')}</div>`).join('')}</div>
     <div class="ch-l">${days.map(d => `<span>${+d.slice(8)}</span>`).join('')}</div>
@@ -33,5 +33,5 @@ export async function render(el) {
     <p class="sec">งานค้างและรอตรวจ</p>` +
     ([...late, ...open.filter(t => !late.includes(t)), ...wait].slice(0, 15).map(t => `<div class="c"><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${late.includes(t) ? dueTag(t) : ''}</small></div>${pill(t.status)}</div>`).join('') || `<div class="empty">ไม่มีงานค้าง</div>`) + `</div>`;
   const dnIds = new Set((r3.data ?? []).map(l => l.routine_id));
-  el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => ({ done: () => showTasks('งานที่เสร็จ', doneL), doing: () => showTasks('กำลังทำ', doingL), open: () => showTasks('งานค้าง', open), rt: () => showRoutines(r2.data ?? [], dnIds) })[b.dataset.k]());
+  el.querySelectorAll('[data-k]').forEach(b => b.onclick = () => ({ done: () => showTasks('งานที่เสร็จ', doneL), open: () => showTasks('งานค้าง', open), rt: () => showRoutines(r2.data ?? [], dnIds) })[b.dataset.k]());
 }

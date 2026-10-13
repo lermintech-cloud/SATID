@@ -20,7 +20,7 @@ export async function render(el) {
     <p class="sec">รายการงานทั้งหมด (${ts.length})</p>
     <div class="tabs"><button data-tab="todo" class="${isDone ? '' : 'on'}">รอทำ (${todoT.length})</button><button data-tab="done" class="${isDone ? 'on' : ''}">เสร็จแล้ว (${doneT.length})</button></div>` +
     (shown.map(t => `<div class="c ${isDone ? 'tk-dn' : 'tk-wt'}"><div class="i s-${t.status}">${ic('task')}</div><div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')}${t.due_at ? ` · <span${!isDone && new Date(t.due_at) < Date.now() ? ' style="color:#DC2626;font-weight:700"' : ''}>กำหนด ${fmtDue(t.due_at)}</span>` : ''}${link(t.photo_before_url, 'ก่อน')}${link(t.photo_after_url, 'หลัง')}</small></div>` +
-      (t.status === 'submitted' ? `<button class="p ok" data-a="approved" data-id="${t.id}">อนุมัติ</button><button class="p er" data-a="rejected" data-id="${t.id}">ตีกลับ</button>` : pill(t.status)) +
+      pill(t.status) +
       `<button class="p" data-m="${t.id}" aria-label="จัดการงาน">${ic('more', 18)}</button></div>`).join('') || `<div class="empty">${isDone ? 'ยังไม่มีงานที่เสร็จ' : 'ไม่มีงานที่รอทำ'}</div>`) + `</div>`;
   el.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; render(el); });
   el.querySelector('#f').onsubmit = async e => {
@@ -28,18 +28,18 @@ export async function render(el) {
     f.due_at ? f.due_at = new Date(f.due_at).toISOString() : delete f.due_at; if (!f.detail) delete f.detail;
     done((await db.from('tasks').insert(f)).error, 'มอบหมายงานแล้ว');
   };
-  el.querySelectorAll('[data-a]').forEach(b => b.onclick = async () => done((await db.from('tasks').update({ status: b.dataset.a }).eq('id', b.dataset.id)).error, 'บันทึกแล้ว'));
   el.querySelectorAll('[data-m]').forEach(b => b.onclick = () => edit(ts.find(x => x.id === b.dataset.m)));
 
   function edit(t) {
     const o = sheet('แก้ไขงาน', `<form id="ef" class="f"><input class="in" name="title" value="${esc(t.title)}" placeholder="ชื่องาน" required><input class="in" name="detail" value="${esc(t.detail || '')}" placeholder="รายละเอียด">
       <select class="in" name="worker_id">${ws.map(w => `<option value="${w.id}" ${w.id === t.worker_id ? 'selected' : ''}>${esc(w.name)}</option>`).join('')}</select>
       <input class="in" type="datetime-local" name="due_at" value="${loc(t.due_at)}">
-      <select class="in" name="status">${Object.entries(ST).map(([k, v]) => `<option value="${k}" ${k === t.status ? 'selected' : ''}>${v[0]}</option>`).join('')}</select>
+      <select class="in" name="status">${['todo', 'approved'].map(k => `<option value="${k}" ${k === (t.status === 'approved' ? 'approved' : 'todo') ? 'selected' : ''}>${ST[k][0]}</option>`).join('')}</select>
       <button class="b">บันทึกการแก้ไข</button><button type="button" class="b dg" id="rm">ลบงานนี้</button></form>`);
     o.querySelector('#ef').onsubmit = async e => {
       e.preventDefault(); const p = Object.fromEntries(new FormData(e.target));
       p.due_at = p.due_at ? new Date(p.due_at).toISOString() : null; p.detail = p.detail || null;
+      if (p.status === (t.status === 'approved' ? 'approved' : 'todo')) delete p.status;
       if (p.status === 'approved' && !t.submitted_at) p.submitted_at = new Date().toISOString();
       o.remove(); done((await db.from('tasks').update(p).eq('id', t.id)).error, 'แก้ไขแล้ว');
     };

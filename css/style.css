@@ -205,3 +205,10 @@ body[data-theme=settings]{--a:#334155;--a2:#475569;--a3:#94A3B8;--tint:#E2E8F0;-
 /* ===== การ์ดงานพิเศษ: เสร็จ=เขียวพาสเทล / รอทำ=แดงพาสเทล ===== */
 body .g .c.tk-dn{background:#ECFDF3;border-left:4px solid #86EFAC}
 body .g .c.tk-wt{background:#FFF1F1;border-left:4px solid #FCA5A5}
+
+/* ===== กระดิ่งลอยเหนือปุ่ม ผอ. / รูปโปรไฟล์ใหญ่ขึ้น / การ์ดสถิติ ผอ. 3 ช่อง ===== */
+.bell.fl{position:fixed;top:auto;right:auto;z-index:9;width:48px;height:48px;left:calc(50% + min(100vw,480px) * .4);bottom:calc(env(safe-area-inset-bottom) + 94px);transform:translateX(-50%);background:#fff;color:#5B21B6;border:2px solid #DDD6FE;box-shadow:0 8px 22px #0b253a4d}
+.bell.fl:active{transform:translateX(-50%) scale(.94)}
+body .h{padding-top:calc(env(safe-area-inset-top) + 72px)}
+body .h .me{width:58px;height:58px}
+.st div[data-k=done]{background:#E9FBF0}.st div[data-k=open]{background:#FFEDED}.st div[data-k=rt]{background:#EAF1FF}
