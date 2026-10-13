@@ -212,3 +212,16 @@ body .g .c.tk-wt{background:#FFF1F1;border-left:4px solid #FCA5A5}
 body .h{padding-top:calc(env(safe-area-inset-top) + 72px)}
 body .h .me{width:58px;height:58px}
 .st div[data-k=done]{background:#E9FBF0}.st div[data-k=open]{background:#FFEDED}.st div[data-k=rt]{background:#EAF1FF}
+
+/* ===== กระดิ่ง: ไม่มีวงกลม มีสี และสั่นเป็นระยะ ===== */
+.bell.fl{background:none;border:0;box-shadow:none;width:56px;height:56px}
+.bell.fl svg{width:38px;height:38px;color:#B45309;fill:#FBBF24;stroke-width:1.6;filter:drop-shadow(0 3px 5px #0b253a66);transform-origin:50% 12%;animation:ring 3.6s ease-in-out infinite}
+.bell.fl .bdg{top:4px;right:4px}
+@keyframes ring{0%,55%,100%{transform:rotate(0)}59%{transform:rotate(18deg)}63%{transform:rotate(-16deg)}67%{transform:rotate(13deg)}71%{transform:rotate(-10deg)}75%{transform:rotate(6deg)}79%{transform:rotate(-3deg)}83%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){.bell.fl svg{animation:none}}
+/* ===== ตัวปรับรูปโปรไฟล์ ===== */
+.crop{position:relative;overflow:hidden;margin:4px auto 0;background:#E3F4F1;border-radius:18px;touch-action:none;cursor:grab;user-select:none}
+.crop img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;pointer-events:none}
+.crop-m{position:absolute;inset:0;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 999px #0b1f2499;pointer-events:none}
+.crop-h{text-align:center;font-size:13px;color:var(--mut);margin:0}
+.crop-z{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--mut)}.crop-z input{flex:1;accent-color:var(--a)}

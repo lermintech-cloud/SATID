@@ -1,5 +1,6 @@
 import { db } from '../db.js';
-import { uploadPhoto } from '../image.js';
+import { sendPhoto } from '../image.js';
+import { cropPhoto } from '../photoCrop.js';
 import { esc, toast, header, busy } from '../ui.js';
 import { ic } from '../icons.js';
 import { me, loadMe, paintMe } from '../me.js';
@@ -17,21 +18,26 @@ async function draw(el) {
   const f = (n, p, v, t = 'text') => `<input class="in" name="${n}" type="${t}" value="${esc(v || '')}" placeholder="${p}">`;
   el.innerHTML = head + `<div class="g pf"><div class="big">${w.photo_url ? `<img src="${esc(w.photo_url)}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : ic('user', 48)}</div>
     <div><b style="font-size:20px">${esc(w.name)}</b><br><small style="color:var(--mut)">นักการภารโรง</small></div>
-    <div class="row"><label class="p on">${ic('camera', 16)} ถ่ายรูป<input type="file" accept="image/*" capture="user" hidden></label><label class="p">${ic('image', 16)} เลือกจากเครื่อง<input type="file" accept="image/*" hidden></label></div>` +
+    <div class="row"><label class="p on">${ic('camera', 16)} ถ่ายรูป<input type="file" accept="image/*" capture="user" hidden></label><label class="p">${ic('image', 16)} เลือกจากเครื่อง<input type="file" accept="image/*" hidden></label>${w.photo_url ? `<button class="p" id="adj">${ic('pen', 16)} ปรับรูป</button>` : ''}</div>` +
     (ready ? '' : `<div class="c" style="display:block;text-align:left"><b>ยังเพิ่มช่องข้อมูลไม่ครบ</b><br><small>รัน sql/profile.sql ใน Supabase ก่อน จึงจะบันทึกข้อมูลติดต่อได้</small></div>`) +
     (editing ? `<form id="pf" class="f">${f('name', 'ชื่อ-สกุล', w.name)}${f('phone', 'เบอร์โทร', w.phone, 'tel')}${f('line_id', 'LINE ID', w.line_id)}${f('area', 'พื้นที่ที่ดูแล', w.area)}${f('note', 'หมายเหตุ เช่น เวลาทำงาน', w.note)}<button class="b">บันทึก</button><button type="button" class="b o" id="cx">ยกเลิก</button></form>`
       : (row('phone', 'เบอร์โทร', w.phone) + row('chat', 'LINE ID', w.line_id) + row('pin', 'พื้นที่ที่ดูแล', w.area) + row('task', 'หมายเหตุ', w.note) +
         (w.phone || w.line_id || w.note ? '' : `<div class="empty">ยังไม่มีข้อมูลติดต่อ กดปุ่มด้านล่างเพื่อเพิ่ม</div>`) + `<button class="b" id="ed">แก้ไขข้อมูล</button>`)) + `</div>`;
-  el.querySelectorAll('input[type=file]').forEach(i => i.onchange = async () => {
-    const file = i.files[0]; if (!file) return;
-    const ov = busy('กำลังเตรียมรูป…');
+  const save = async src => {
+    let ov;
     try {
-      const url = await uploadPhoto(db, `profiles/${me.id}`, 'photo', file, m => ov.set(m), [512, 160]);
+      const c = await cropPhoto(src); if (!c) return;
+      ov = busy('กำลังอัปโหลด… อย่าปิดหน้านี้');
+      const url = await sendPhoto(db, `profiles/${me.id}/photo-${Date.now()}`, c.full, c.thumb);
       const { error } = await db.from('workers').update({ photo_url: url }).eq('id', me.id);
       if (error) throw error;
       me.photo = url; paintMe(); ov.set('เสร็จแล้ว'); await new Promise(r => setTimeout(r, 500));
-    } catch (e) { toast('อัปโหลดไม่สำเร็จ: ' + e.message); } finally { ov.done(); }
+    } catch (e) { toast('อัปโหลดไม่สำเร็จ: ' + e.message); } finally { ov?.done(); }
     draw(el);
+  };
+  el.querySelectorAll('input[type=file]').forEach(i => i.onchange = () => { const file = i.files[0]; if (file) save(file); });
+  el.querySelector('#adj')?.addEventListener('click', async () => {
+    try { save(await (await fetch(w.photo_url)).blob()); } catch (e) { toast('โหลดรูปเดิมไม่สำเร็จ: ' + e.message); }
   });
   el.querySelector('#ed')?.addEventListener('click', () => { editing = true; draw(el); });
   el.querySelector('#cx')?.addEventListener('click', () => { editing = false; draw(el); });
