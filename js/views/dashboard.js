@@ -21,6 +21,10 @@ export async function renderDashboard(el) {
   const rts = rt.data ?? [], dn = new Set((lg.data ?? []).map(l => l.routine_id));
   const rd = rt.error ? '–' : `${rts.filter(x => dn.has(x.id)).length}/${rts.length}`;
   const tiles = [['g-gr', 'check', 'งานเสร็จ (1 ปี)', data.length, 'done'], ['g-or', 'wrench', 'งานค้าง', open.length, 'open'], ['g-bl', 'task', 'เกินกำหนด', late.length, 'late'], ['g-vi', 'list', 'งานประจำวันนี้', rd, 'rt']];
+  // สไลด์ภาพงานล่าสุด: สุ่ม 3 งานจาก 20 งานล่าสุดที่มีรูปหลังทำ
+  const picks = data.filter(t => t.photo_after_url).slice(0, 20).sort(() => Math.random() - .5).slice(0, 3);
+  let k = 0;
+  const slideTile = picks.length ? `<button class="gt gt-ss" data-t="ss" aria-label="ภาพงานล่าสุด">${picks.map((t, i) => `<img class="ss-i ${i ? '' : 'on'}" src="${esc(thumb(t.photo_after_url))}" alt="" ${i ? 'loading="lazy"' : ''}>`).join('')}<span class="ss-cap">${esc(picks[0].title)}</span></button>` : '';
   const by = {}; data.forEach(t => { const k = t.workers?.name || '-'; by[k] = (by[k] || 0) + 1; });
   const rank = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const av = t => t.photo_after_url ? `<img class="av lg" src="${esc(thumb(t.photo_after_url))}" alt="" loading="lazy">` : `<div class="av lg">${esc((t.workers?.name || '?')[0])}</div>`;
@@ -37,11 +41,11 @@ export async function renderDashboard(el) {
     const pagination = pageCount > 1 ? `<nav class="pg" aria-label="เปลี่ยนหน้างานที่ทำล่าสุด"><button class="pg-n" data-pg="prev" aria-label="หน้าก่อนหน้า" ${page === 1 ? 'disabled' : ''}>‹</button>${pages.map(n => `<button class="pg-n ${n === page ? 'on' : ''}" data-pg="${n}" aria-label="หน้า ${n}" ${n === page ? 'aria-current="page"' : ''}>${n}</button>`).join('')}<button class="pg-n" data-pg="next" aria-label="หน้าถัดไป" ${page === pageCount ? 'disabled' : ''}>›</button></nav>` : '';
     return `${pagination}<div class="recent-list">${items.map((t, i) => `<button class="c" data-i="${i}">${av(t)}<div class="t">${esc(t.title)}<small>${esc(t.workers?.name || '')} · ${fmt(t.submitted_at)}</small></div></button>`).join('')}</div>`;
   };
-  el.innerHTML = `<div class="g"><div class="gts">${tiles.map(([c, i, l, v, k]) => `<button class="gt ${c}" data-t="${k}"><div class="gi">${ic(i, 26)}</div><div><small>${l}</small><b>${v}</b></div></button>`).join('')}</div>` +
+  el.innerHTML = `<div class="g"><div class="gts">${tiles.map(([c, i, l, v, key]) => key === 'late' && slideTile ? slideTile : `<button class="gt ${c}" data-t="${key}"><div class="gi">${ic(i, 26)}</div><div><small>${l}</small><b>${v}</b></div></button>`).join('')}</div>` +
     (rank.length ? `<p class="sec">ผลงานเด่น</p><div class="c" style="display:block">${rank.map(([n, v], i) => `<div class="rk"><span>${MEDAL[i]} ${esc(n)}</span><b>${v} งาน</b></div>`).join('')}</div>` : '') +
     `<p class="sec">งานที่ทำล่าสุด <small style="font-weight:400;color:var(--mut)">แตะรูปเพื่อดูภาพก่อน-หลัง</small></p>` +
     (data.length ? recentList() : `<div class="empty">ยังไม่มีงานที่เสร็จ</div>`) + `</div>`;
-  el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => ({ done: () => showTasks('งานเสร็จ 1 ปีล่าสุด', data), open: () => showTasks('งานค้าง', open), late: () => showTasks('งานเกินกำหนด', late), rt: () => showRoutines(rts, dn) })[b.dataset.t]());
+  el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => ({ done: () => showTasks('งานเสร็จ 1 ปีล่าสุด', data), open: () => showTasks('งานค้าง', open), late: () => showTasks('งานเกินกำหนด', late), rt: () => showRoutines(rts, dn), ss: () => { const t = picks[k]; lightbox([{ url: t.photo_before_url, label: 'ก่อนทำ' }, { url: t.photo_after_url, label: 'หลังทำ' }]); } })[b.dataset.t]());
   function bindRecentActions() {
     el.querySelectorAll('[data-i]').forEach(b => b.onclick = () => {
       const { items } = recent();
@@ -61,4 +65,12 @@ export async function renderDashboard(el) {
     });
   }
   bindRecentActions();
+  clearInterval(el._ss);
+  if (picks.length > 1) el._ss = setInterval(() => {
+    const tile = el.querySelector('.gt-ss');
+    if (!tile || !el.isConnected) return clearInterval(el._ss);
+    k = (k + 1) % picks.length;
+    tile.querySelectorAll('.ss-i').forEach((m, i) => m.classList.toggle('on', i === k));
+    tile.querySelector('.ss-cap').textContent = picks[k].title;
+  }, 3500);
 }
