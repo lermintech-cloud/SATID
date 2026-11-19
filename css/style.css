@@ -181,7 +181,7 @@ body[data-theme=settings]{--a:#334155;--a2:#475569;--a3:#94A3B8;--tint:#E2E8F0;-
 .tabs button{flex:1;border:0;background:none;border-radius:99px;padding:10px 6px;font-weight:700;font-size:14px;color:var(--mut);cursor:pointer}
 .tabs button.on{background:linear-gradient(135deg,var(--a),var(--a2));color:#fff}
 #qb{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 100px);z-index:7;background:#1E293B;color:#fff;padding:8px 14px;border-radius:99px;font-size:13px;box-shadow:0 8px 24px #0004;white-space:nowrap}
-#qb[hidden]{display:none}#qb button{border:0;background:#34D399;color:#064E3B;border-radius:99px;padding:2px 10px;font-weight:700;margin-left:6px;cursor:pointer}
+#qb[hidden],#tgx[hidden]{display:none}#qb button{border:0;background:#34D399;color:#064E3B;border-radius:99px;padding:2px 10px;font-weight:700;margin-left:6px;cursor:pointer}
 .ib{bottom:calc(env(safe-area-inset-bottom) + 156px)}
 /* ===== เมนูล่างโทนโมเดิร์น: ปุ่มทั้ง 5 มีสีประจำเมนู ===== */
 #nav{background:linear-gradient(135deg,#123D4B 0%,#0F6470 52%,#23527E 100%);border:1px solid #ffffff26;box-shadow:0 -10px 28px #0b253a50;overflow:visible;padding:11px 7px calc(env(safe-area-inset-bottom) + 9px)}

@@ -11,9 +11,10 @@ export async function refreshBell() {
   if (me.id) q = q.eq('worker_id', me.id);
   const [t, rt, lg] = await Promise.all([q, db.from('routines').select('id').eq('active', true), db.from('routine_logs').select('routine_id').eq('log_date', today())]);
   const open = t.data ?? [], list = [], late = open.filter(x => x.due_at && new Date(x.due_at) < Date.now()).length;
-  if (open.length) list.push({ c: 's-doing', t: `งานค้าง ${open.length} งาน`, s: late ? `เกินกำหนด ${late} งาน` : 'เปิดดูรายการงาน', go: 'worker' });
+  // เลือกได้ในหน้าตั้งค่า ว่ากระดิ่งของเครื่องนี้จะแจ้งเรื่องไหนบ้าง
+  if (open.length && localStorage.getItem('bellPending') !== '0') list.push({ c: 's-doing', t: `งานค้าง ${open.length} งาน`, s: late ? `เกินกำหนด ${late} งาน` : 'เปิดดูรายการงาน', go: 'worker' });
   const ids = new Set((rt.data ?? []).map(r => r.id)), dn = (lg.data ?? []).filter(l => ids.has(l.routine_id)).length;
-  if (!rt.error && ids.size && dn < ids.size) list.push({ c: 'tone-n', t: `งานประจำวันนี้ยังไม่ครบ (${dn}/${ids.size})`, s: 'แตะเพื่อไปเช็ค', go: 'today' });
+  if (!rt.error && localStorage.getItem('bellRoutine') !== '0' && ids.size && dn < ids.size) list.push({ c: 'tone-n', t: `งานประจำวันนี้ยังไม่ครบ (${dn}/${ids.size})`, s: 'แตะเพื่อไปเช็ค', go: 'today' });
   items = list; me.bell = list.length;
   document.querySelectorAll('[data-bell] .bdg').forEach(b => { b.hidden = !me.bell; b.textContent = me.bell || ''; });
 }

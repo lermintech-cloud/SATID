@@ -2,8 +2,12 @@ import { db } from '../db.js';
 import { esc, toast, header, ST } from '../ui.js';
 import { ic } from '../icons.js';
 import { install, canInstall, installed, isIOS } from '../install.js';
-const VERSION = '2.0';
+import { refreshBell } from '../notify.js';
+const VERSION = '2.1';
 const SAMPLES = ['เปิดประตูโรงเรียน', 'กวาดลานหน้าเสาธง', 'ทำความสะอาดห้องน้ำ', 'เก็บขยะทั่วบริเวณ', 'รดน้ำต้นไม้', 'เช็ดถูทางเดินอาคารเรียน', 'ตรวจก๊อกน้ำและไฟฟ้า', 'เติมสบู่และกระดาษชำระ', 'เปิด-ปิดไฟส่วนกลาง', 'ปิดไฟ ล็อกประตูห้อง'];
+const DAYS = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
+// สวิตช์ที่บันทึกบนเซิร์ฟเวอร์ (ใช้ร่วมทุกเครื่อง) กับสวิตช์ที่จำเฉพาะเครื่องนี้
+const TG_SW = ['tg_enabled', 'tg_s1', 'tg_s2', 'tg_pending', 'tg_routine', 'tg_new', 'tg_done', 'tg_photo'], LOCAL = ['notifAuto', 'bellPending', 'bellRoutine'];
 const sw = (k, on) => `<button type="button" class="swt ${on ? 'on' : ''}" role="switch" aria-checked="${!!on}" data-sw="${k}"><i></i></button>`;
 const row = (i, t, s, right = '') => `<div class="c"><div class="i">${ic(i, 20)}</div><div class="t">${t}<small>${s}</small></div>${right}</div>`;
 const btn = (id, label, cls = 'on') => `<button class="p ${cls}" id="${id}" type="button">${label}</button>`;
@@ -35,16 +39,29 @@ export async function render(el) {
 
 async function panel(el, pin, S) {
   const { data: rt = [] } = await db.from('routines').select('*').eq('active', true).order('sort').order('created_at');
-  const on = k => (S[k] ?? (k === 'tg_pending' || k === 'tg_routine' ? '1' : '0')) === '1', rts = rt ?? [];
+  // ค่าเริ่มต้นของสวิตช์: ตัวหลักปิดไว้ ส่วนตัวเลือกย่อยเปิดไว้ (เหมือนพฤติกรรมเดิม)
+  const on = k => (S[k] ?? (k === 'tg_enabled' ? '0' : '1')) === '1', rts = rt ?? [];
+  const days = S.tg_days ?? '1234567', loc = k => localStorage.getItem(k) !== '0';
+  const slot = (n, def) => `<div class="c"><div class="i">${ic('clock', 20)}</div><div class="t">รอบที่ ${n}</div><input class="in" type="time" name="tg_time${n}" value="${esc(S['tg_time' + n] || def)}" style="width:140px;height:44px;padding:0 8px">${sw('tg_s' + n, on('tg_s' + n))}</div>`;
   el.innerHTML = header('ตั้งค่า', 'ควบคุมระบบทั้งหมด') + `<div class="g">
     <p class="sec">แจ้งเตือน Telegram</p>
     <form id="tg" class="f">
       <input class="in" name="tg_token" type="password" autocomplete="off" placeholder="${S.tg_token_set ? 'Bot token ตั้งไว้แล้ว (เว้นว่างเพื่อใช้ค่าเดิม)' : 'Bot token จาก @BotFather'}">
       <input class="in" name="tg_chat_id" value="${esc(S.tg_chat_id || '')}" placeholder="Group / Chat ID เช่น -1001234567890">
-      <div class="rowf"><input class="in" type="time" name="tg_time1" value="${esc(S.tg_time1 || '07:30')}"><input class="in" type="time" name="tg_time2" value="${esc(S.tg_time2 || '15:30')}"></div>
-      ${row('send', 'เปิดการแจ้งเตือน Telegram', 'ส่งตามเวลา และเมื่อมีงานใหม่/ส่งงาน', sw('tg_enabled', on('tg_enabled')))}
-      ${row('task', 'แจ้ง งานค้าง', 'รายการงานที่ยังไม่เสร็จ', sw('tg_pending', on('tg_pending')))}
-      ${row('list', 'แจ้ง งานประจำวัน', 'ที่ยังไม่ได้ติ๊ก', sw('tg_routine', on('tg_routine')))}
+      ${row('send', 'เปิดการแจ้งเตือน Telegram', 'สวิตช์หลัก ปิดแล้วจะไม่ส่งอะไรเลย', sw('tg_enabled', on('tg_enabled')))}
+      <div id="tgx" class="f"${on('tg_enabled') ? '' : ' hidden'}>
+        <b style="margin-top:6px">สรุปงานตามเวลา</b>
+        ${slot(1, '07:30')}${slot(2, '15:30')}
+        <div class="c" style="display:block"><div class="t">วันที่ส่งสรุป<small>แตะเพื่อเลือก/ไม่เลือกแต่ละวัน</small></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">${DAYS.map((d, i) => `<button type="button" class="p ${days.includes(i + 1) ? 'on' : ''}" data-day="${i + 1}">${d}</button>`).join('')}</div>
+          <div style="display:flex;gap:6px;margin-top:8px"><button type="button" class="p" data-dp="12345">จ.–ศ.</button><button type="button" class="p" data-dp="1234567">ทุกวัน</button></div></div>
+        ${row('task', 'ใส่ งานค้าง ในสรุป', 'รายการงานที่ยังไม่เสร็จ', sw('tg_pending', on('tg_pending')))}
+        ${row('list', 'ใส่ งานประจำวัน ในสรุป', 'ที่ยังไม่ได้ติ๊ก', sw('tg_routine', on('tg_routine')))}
+        <b style="margin-top:6px">แจ้งทันที</b>
+        ${row('plus', 'เมื่อมอบหมายงานใหม่', 'ส่งชื่องาน ผู้รับผิดชอบ และกำหนดเสร็จ', sw('tg_new', on('tg_new')))}
+        ${row('ok', 'เมื่อภารโรงส่งงาน', 'แจ้งเมื่องานถูกส่งหรืออนุมัติ', sw('tg_done', on('tg_done')))}
+        ${row('camera', 'แนบรูปก่อน-หลังตอนส่งงาน', 'ปิดเพื่อส่งเป็นข้อความอย่างเดียว', sw('tg_photo', on('tg_photo')))}
+      </div>
       <button class="b">บันทึกการตั้งค่า</button>
       <div class="rowf">${btn('tt', 'ส่งข้อความทดสอบ')}${btn('tn', 'ส่งสรุปตอนนี้', '')}</div>
     </form>
@@ -55,17 +72,35 @@ async function panel(el, pin, S) {
     <form id="cp" class="f"><input class="in" name="o" type="password" inputmode="numeric" maxlength="8" placeholder="PIN เดิม" required><input class="in" name="n" type="password" inputmode="numeric" maxlength="8" placeholder="PIN ใหม่ 4-8 หลัก" required><button class="b o">เปลี่ยน PIN</button></form>
     ${row('shield', 'ล็อกหน้าตั้งค่า', 'ต้องใส่ PIN ใหม่เมื่อเข้าอีกครั้ง', btn('lk', 'ล็อก', 'er'))}
     <p class="sec">การใช้งาน</p>` +
-    row('bell', 'เด้งแจ้งเตือนครั้งแรกของวัน', 'เมื่อเปิดแอปครั้งแรกของแต่ละวัน', sw('auto', localStorage.getItem('notifAuto') !== '0')) +
+    row('bell', 'เด้งแจ้งเตือนครั้งแรกของวัน', 'เมื่อเปิดแอปครั้งแรกของแต่ละวัน (เฉพาะเครื่องนี้)', sw('notifAuto', loc('notifAuto'))) +
+    row('task', 'กระดิ่ง: แจ้งงานค้าง', 'แสดงงานที่ยังไม่เสร็จบนกระดิ่ง (เฉพาะเครื่องนี้)', sw('bellPending', loc('bellPending'))) +
+    row('list', 'กระดิ่ง: แจ้งงานประจำวัน', 'แสดงเมื่องานประจำวันยังไม่ครบ (เฉพาะเครื่องนี้)', sw('bellRoutine', loc('bellRoutine'))) +
     (installed() ? row('ok', 'ติดตั้งแล้ว', 'กำลังใช้งานแบบแอป') : canInstall() ? row('download', 'ติดตั้งแอปลงเครื่อง', 'เปิดได้จากหน้าจอโฮม', btn('inst', 'ติดตั้ง')) : row('download', isIOS ? 'ติดตั้งบน iPhone' : 'ติดตั้งแอป', isIOS ? 'แตะปุ่มแชร์ แล้วเลือก เพิ่มไปยังหน้าจอโฮม' : 'เปิดเมนูเบราว์เซอร์ แล้วเลือก ติดตั้งแอป')) +
     row('download', 'ส่งออกรายการงาน (CSV)', 'เปิดด้วย Excel ได้', btn('csv', 'ส่งออก')) +
     row('refresh', 'อัปเดตแอป / ล้างแคช', 'ใช้เมื่ออัปเดตแล้วหน้าตาไม่เปลี่ยน', btn('upd', 'ทำเลย')) +
     row('trash', 'ล้างข้อมูลที่จำในเครื่องนี้', 'ชื่อภารโรงที่เลือกไว้และค่าในเครื่อง', btn('clr', 'ล้าง', 'er')) +
     row('info', `ระบบนักการภารโรง v${VERSION}`, 'พัฒนาโดย ครูเฉลิมพล จันทร์แดง · โรงเรียนบ้านไร่') + `</div>`;
   const again = (error, m) => { toast(error ? error.message : m); render(el); };
-  el.querySelectorAll('[data-sw]').forEach(b => b.onclick = () => { const v = !b.classList.contains('on'); b.classList.toggle('on', v); b.setAttribute('aria-checked', v); if (b.dataset.sw === 'auto') localStorage.setItem('notifAuto', v ? '1' : '0'); });
-  const vals = () => { const f = Object.fromEntries(new FormData(el.querySelector('#tg'))); ['tg_enabled', 'tg_pending', 'tg_routine'].forEach(k => f[k] = el.querySelector(`[data-sw=${k}]`).classList.contains('on') ? '1' : '0'); f.tg_chat_id = f.tg_chat_id.trim(); f.tg_token = f.tg_token.trim(); return f; };
+  el.querySelectorAll('[data-sw]').forEach(b => b.onclick = () => {
+    const k = b.dataset.sw, v = !b.classList.contains('on'); b.classList.toggle('on', v); b.setAttribute('aria-checked', v);
+    if (LOCAL.includes(k)) { localStorage.setItem(k, v ? '1' : '0'); if (k !== 'notifAuto') refreshBell(); toast(v ? 'เปิดแล้ว' : 'ปิดแล้ว'); }
+    if (k === 'tg_enabled') el.querySelector('#tgx').hidden = !v;
+  });
+  const setDays = d => el.querySelectorAll('[data-day]').forEach(b => b.classList.toggle('on', d.includes(b.dataset.day)));
+  el.querySelectorAll('[data-day]').forEach(b => b.onclick = () => b.classList.toggle('on'));
+  el.querySelectorAll('[data-dp]').forEach(b => b.onclick = () => setDays(b.dataset.dp));
+  const vals = () => {
+    const f = Object.fromEntries(new FormData(el.querySelector('#tg')));
+    TG_SW.forEach(k => f[k] = el.querySelector(`[data-sw=${k}]`).classList.contains('on') ? '1' : '0');
+    f.tg_days = [...el.querySelectorAll('[data-day].on')].map(b => b.dataset.day).join('');
+    f.tg_chat_id = f.tg_chat_id.trim(); f.tg_token = f.tg_token.trim(); return f;
+  };
   const save = async () => (await db.rpc('settings_save', { p: pin, vals: vals() })).error;
-  el.querySelector('#tg').onsubmit = async e => { e.preventDefault(); const er = await save(); toast(er ? er.message : 'บันทึกแล้ว'); };
+  el.querySelector('#tg').onsubmit = async e => {
+    e.preventDefault(); const f = vals();
+    if (f.tg_enabled === '1' && (f.tg_s1 === '1' || f.tg_s2 === '1') && !f.tg_days) return toast('เลือกวันที่ส่งสรุปอย่างน้อย 1 วัน');
+    const er = await save(); toast(er ? er.message : 'บันทึกแล้ว');
+  };
   el.querySelector('#tt').onclick = async () => {
     let er = await save(); if (er) return toast(er.message);
     const r = await db.rpc('telegram_test', { p: pin }); if (r.error) return toast(r.error.message);
