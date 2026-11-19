@@ -5,14 +5,17 @@
 create or replace function public.telegram_task_notify(p_task_id uuid, p_kind text)
 returns void language plpgsql security definer set search_path = public, extensions as $$
 declare
-  tok text; chat text; enabled text;
+  tok text; chat text; enabled text; want text; photo text;
   task_title text; task_detail text; worker_name text; due_at timestamptz;
   before_url text; after_url text; msg text;
 begin
   select value into enabled from settings where key = 'tg_enabled';
   select value into tok from settings where key = 'tg_token';
   select value into chat from settings where key = 'tg_chat_id';
-  if coalesce(enabled, '0') <> '1' or coalesce(tok, '') = '' or coalesce(chat, '') = '' then return; end if;
+  -- เปิด/ปิดแยกกัน: tg_new = แจ้งงานใหม่, tg_done = แจ้งส่งงาน, tg_photo = แนบรูปก่อน-หลัง (ค่าเริ่มต้นเปิด)
+  select value into want from settings where key = case when p_kind = 'created' then 'tg_new' else 'tg_done' end;
+  select value into photo from settings where key = 'tg_photo';
+  if coalesce(enabled, '0') <> '1' or coalesce(want, '1') <> '1' or coalesce(tok, '') = '' or coalesce(chat, '') = '' then return; end if;
 
   select t.title, t.detail, w.name, t.due_at, t.photo_before_url, t.photo_after_url
     into task_title, task_detail, worker_name, due_at, before_url, after_url
@@ -37,6 +40,10 @@ begin
     'งาน: ' || task_title || E'\n' ||
     'ผู้รับผิดชอบ: ' || coalesce(worker_name, '-') ||
     case when coalesce(task_detail, '') <> '' then E'\nรายละเอียด: ' || left(task_detail, 500) else '' end;
+
+  if coalesce(photo, '1') <> '1' then
+    before_url := null; after_url := null;
+  end if;
 
   if coalesce(before_url, '') <> '' and coalesce(after_url, '') <> '' then
     perform net.http_post(

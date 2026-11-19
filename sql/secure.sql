@@ -38,7 +38,7 @@ create or replace function public.settings_get(p text) returns jsonb language pl
 declare j jsonb;
 begin
   if not public._pin_ok(p) then raise exception 'PIN ไม่ถูกต้อง'; end if;
-  select coalesce(jsonb_object_agg(key, value), '{}'::jsonb) into j from settings where key in ('tg_enabled', 'tg_chat_id', 'tg_time1', 'tg_time2', 'tg_pending', 'tg_routine');
+  select coalesce(jsonb_object_agg(key, value), '{}'::jsonb) into j from settings where key in ('tg_enabled', 'tg_chat_id', 'tg_time1', 'tg_time2', 'tg_s1', 'tg_s2', 'tg_days', 'tg_pending', 'tg_routine', 'tg_new', 'tg_done', 'tg_photo');
   return j || jsonb_build_object('tg_token_set', exists (select 1 from settings where key = 'tg_token' and coalesce(value, '') <> ''));
 end $$;
 
@@ -46,7 +46,9 @@ create or replace function public.settings_save(p text, vals jsonb) returns bool
 declare k text;
 begin
   if not public._pin_ok(p) then raise exception 'PIN ไม่ถูกต้อง'; end if;
-  foreach k in array array['tg_enabled', 'tg_chat_id', 'tg_token', 'tg_time1', 'tg_time2', 'tg_pending', 'tg_routine'] loop
+  foreach k in array array['tg_enabled', 'tg_chat_id', 'tg_token', 'tg_time1', 'tg_time2', 'tg_s1', 'tg_s2', 'tg_days', 'tg_pending', 'tg_routine', 'tg_new', 'tg_done', 'tg_photo'] loop
+    if k in ('tg_time1', 'tg_time2') and jsonb_exists(vals, k) and coalesce(vals->>k, '') !~ '^([0-2][0-9]:[0-5][0-9])?$' then raise exception 'รูปแบบเวลาไม่ถูกต้อง'; end if;
+    if k = 'tg_days' and jsonb_exists(vals, k) and coalesce(vals->>k, '') !~ '^[1-7]*$' then raise exception 'รูปแบบวันไม่ถูกต้อง'; end if;
     if jsonb_exists(vals, k) and not (k = 'tg_token' and coalesce(vals->>k, '') = '') then
       insert into settings (key, value) values (k, vals->>k) on conflict (key) do update set value = excluded.value;
     end if;
@@ -56,7 +58,7 @@ end $$;
 -- ===== บล็อก 5: ส่ง Telegram (ทีละฟังก์ชัน) =====
 create or replace function public.send_reminders(force boolean default false) returns void language plpgsql security definer set search_path = public, extensions as $$
 declare
-  tok text; chat text; en text; pend text; rout text; slot text; tm text; lastd date; hit boolean := false;
+  tok text; chat text; en text; pend text; rout text; slot text; tm text; sw text; days text; lastd date; hit boolean := false;
   nowbk timestamp := now() at time zone 'Asia/Bangkok';
   today date := (now() at time zone 'Asia/Bangkok')::date;
   msg text; n int; lst text; dn int; tot int;
@@ -66,9 +68,17 @@ begin
   select value into chat from settings where key = 'tg_chat_id';
   select value into pend from settings where key = 'tg_pending';
   select value into rout from settings where key = 'tg_routine';
+  select value into days from settings where key = 'tg_days';
+  -- ปิดทั้งสองหัวข้อ = ไม่มีอะไรให้สรุป
+  if coalesce(pend, '1') <> '1' and coalesce(rout, '1') <> '1' then return; end if;
   if not force then
     if coalesce(en, '0') <> '1' then return; end if;
+    -- วันที่เลือกให้ส่ง (1=จันทร์ … 7=อาทิตย์) ค่าเริ่มต้นส่งทุกวัน
+    if position(extract(isodow from today)::text in coalesce(days, '1234567')) = 0 then return; end if;
     foreach slot in array array['tg_time1', 'tg_time2'] loop
+      -- เปิด/ปิดแต่ละรอบเวลาได้อิสระ (tg_s1, tg_s2)
+      select value into sw from settings where key = case when slot = 'tg_time1' then 'tg_s1' else 'tg_s2' end;
+      continue when coalesce(sw, '1') <> '1';
       select value into tm from settings where key = slot;
       tm := coalesce(nullif(tm, ''), case when slot = 'tg_time1' then '07:30' else '15:30' end);
       select value::date into lastd from settings where key = 'last_' || slot;
